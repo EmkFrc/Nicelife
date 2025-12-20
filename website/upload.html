@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NiceLife 🌳 — Upload</title>
+  <link rel="stylesheet" href="/nicelife-style.css">
+  <style>
+    /* petites adaptations pour la page upload */
+    .upload-panel {
+      max-width: 720px;
+      margin: 120px auto 80px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      z-index: 20;
+      position: relative;
+      box-shadow: var(--shadow-md);
+    }
+    .upload-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      margin-bottom:1rem;
+    }
+    .upload-title { font-size:1.5rem; font-weight:700; color:var(--text-primary); }
+    .upload-desc { color:var(--text-secondary); font-size:0.95rem; }
+    .file-row { display:flex; gap:1rem; align-items:center; margin:1rem 0; flex-wrap:wrap; }
+    .file-input {
+      display:inline-block;
+      padding:0.6rem 1rem;
+      border-radius:8px;
+      border:1px solid var(--border-green);
+      background:transparent;
+      color:var(--text-primary);
+      cursor:pointer;
+    }
+    .btn-upload {
+      padding:0.6rem 1rem;
+      background:var(--accent-green);
+      color:#000;
+      border-radius:8px;
+      border:none;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .btn-upload[disabled] { opacity:0.6; cursor:default; }
+    .preview {
+      margin-top:1rem;
+      display:flex;
+      gap:1rem;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .thumb {
+      width:160px;
+      height:160px;
+      object-fit:cover;
+      border-radius:8px;
+      border:1px solid var(--border-color);
+      box-shadow:var(--shadow-sm);
+    }
+    .progress {
+      width:100%;
+      height:12px;
+      background:rgba(255,255,255,0.06);
+      border-radius:6px;
+      overflow:hidden;
+      margin-top:0.5rem;
+    }
+    .progress > span {
+      display:block;
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, var(--accent-green), var(--accent-green-light));
+      transition:width 0.2s linear;
+    }
+    .msg { margin-top:0.75rem; color:var(--text-secondary); font-size:0.95rem; }
+    .error { color:#ff6b6b; }
+    .success { color:var(--accent-green); font-weight:600; }
+    /* accessible hidden label for file input */
+    .sr-only { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo"><span class="logo-icon">🌳</span><span class="logo-text">NiceLife</span></div>
+      <div class="nav-links">
+        <a href="/" class="btn-nav">Accueil</a>
+        <a href="/login.py" class="btn-nav">Se connecter</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container upload-panel" role="main" aria-labelledby="uploadTitle">
+    <div class="upload-header">
+      <div>
+        <div id="uploadTitle" class="upload-title">Uploader une image</div>
+        <div class="upload-desc">PNG ou JPG uniquement — taille maximale 5 Mo. Aucune exécution côté serveur.</div>
+      </div>
+      <div>
+        <a href="/" class="btn-nav">Retour</a>
+      </div>
+    </div>
+
+    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" novalidate>
+      <!-- CSRF token: le serveur doit en fournir un et le valider à la réception -->
+      <input type="hidden" name="csrf_token" value="<!-- INSERT_CSRF_TOKEN_SERVER_SIDE -->">
+
+      <div class="file-row">
+        <label class="file-input" for="fileInput" tabindex="0">Choisir un fichier</label>
+        <input id="fileInput" name="file" type="file" accept="image/png,image/jpeg" class="sr-only" required>
+        <button id="submitBtn" class="btn-upload" type="submit">Uploader</button>
+      </div>
+
+      <div class="preview" id="previewArea" aria-live="polite"></div>
+
+      <div class="progress" id="progress" hidden>
+        <span id="progressBar" style="width:0%"></span>
+      </div>
+
+      <div class="msg" id="statusMsg"></div>
+    </form>
+  </main>
+
+  <script>
+    (function(){
+      const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+      const allowedTypes = ['image/png','image/jpeg'];
+      const fileInput = document.getElementById('fileInput');
+      const submitBtn = document.getElementById('submitBtn');
+      const previewArea = document.getElementById('previewArea');
+      const progress = document.getElementById('progress');
+      const progressBar = document.getElementById('progressBar');
+      const statusMsg = document.getElementById('statusMsg');
+      const form = document.getElementById('uploadForm');
+
+      // helper: check magic bytes for PNG / JPEG
+      function checkMagicBytes(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          const slice = file.slice(0, 8);
+          reader.onload = function(e) {
+            const arr = new Uint8Array(e.target.result);
+            // PNG signature: 89 50 4E 47 0D 0A 1A 0A
+            const pngSig = [0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A];
+            if (arr.length >= 3 && arr[0] === 0xFF && arr[1] === 0xD8 && arr[2] === 0xFF) {
+              resolve('image/jpeg');
+              return;
+            }
+            if (arr.length >= 8 && pngSig.every((b,i)=>arr[i]===b)) {
+              resolve('image/png');
+              return;
+            }
+            resolve(null);
+          };
+          reader.onerror = function(){ reject(new Error('Lecture du fichier impossible')); };
+          reader.readAsArrayBuffer(slice);
+        });
+      }
+
+      // preview image
+      function renderPreview(file) {
+        previewArea.innerHTML = '';
+        const img = document.createElement('img');
+        img.className = 'thumb';
+        img.alt = file.name;
+        img.src = URL.createObjectURL(file);
+        previewArea.appendChild(img);
+      }
+
+      // basic client-side validation (always revalidate server-side)
+      fileInput.addEventListener('change', function() {
+        statusMsg.textContent = '';
+        statusMsg.className = 'msg';
+        previewArea.innerHTML = '';
+        progress.hidden = true;
+        progressBar.style.width = '0%';
+
+        const f = fileInput.files[0];
+        if (!f) return;
+        if (f.size > MAX_BYTES) {
+          statusMsg.textContent = 'Fichier trop volumineux (max 5 Mo).';
+          statusMsg.classList.add('error');
+          fileInput.value = '';
+          return;
+        }
+        if (!allowedTypes.includes(f.type)) {
+          // MIME type can be spoofed; magic bytes check follows below
+          // but show quick hint
+          statusMsg.textContent = 'Type MIME non autorisé — vérification plus stricte en cours...';
+          statusMsg.classList.add('error');
+        }
+
+        checkMagicBytes(f).then(sig => {
+          if (!sig) {
+            statusMsg.textContent = 'Type de fichier invalide (signature binaire incompatible).';
+            statusMsg.classList.add('error');
+            fileInput.value = '';
+            return;
+          }
+          if (!allowedTypes.includes(sig)) {
+            statusMsg.textContent = 'Format non autorisé. Seuls PNG ou JPG sont acceptés.';
+            statusMsg.classList.add('error');
+            fileInput.value = '';
+            return;
+          }
+          statusMsg.textContent = 'Fichier prêt : ' + f.name + ' (' + Math.round(f.size/1024) + ' KB)';
+          statusMsg.className = 'msg success';
+          renderPreview(f);
+        }).catch(err => {
+          statusMsg.textContent = 'Erreur lors de la vérification du fichier.';
+          statusMsg.classList.add('error');
+          fileInput.value = '';
+        });
+      });
+
+      // custom submit with progress (XHR) — server must accept multipart/form-data at /upload
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        statusMsg.textContent = '';
+        statusMsg.className = 'msg';
+
+        const f = fileInput.files[0];
+        if (!f) {
+          statusMsg.textContent = 'Veuillez choisir un fichier.';
+          statusMsg.classList.add('error');
+          return;
+        }
+        // client-side guards
+        if (f.size > MAX_BYTES) {
+          statusMsg.textContent = 'Fichier trop volumineux (max 5 Mo).';
+          statusMsg.classList.add('error');
+          return;
+        }
+
+        checkMagicBytes(f).then(sig => {
+          if (!sig || !allowedTypes.includes(sig)) {
+            statusMsg.textContent = 'Format de fichier non autorisé.';
+            statusMsg.classList.add('error');
+            return;
+          }
+
+          // build form data
+          const formData = new FormData();
+          formData.append('file', f);
+          // include CSRF token if present in form
+          const csrf = form.querySelector('input[name="csrf_token"]');
+          if (csrf && csrf.value) formData.append('csrf_token', csrf.value);
+
+          // disable UI
+          submitBtn.disabled = true;
+          fileInput.disabled = true;
+          progress.hidden = false;
+          progressBar.style.width = '0%';
+
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', form.action, true);
+          // optional: server should respond with JSON
+          xhr.setRequestHeader('Accept', 'application/json');
+
+          xhr.upload.onprogress = function(ev) {
+            if (ev.lengthComputable) {
+              const p = Math.round(ev.loaded / ev.total * 100);
+              progressBar.style.width = p + '%';
+            }
+          };
+
+          xhr.onload = function() {
+            submitBtn.disabled = false;
+            fileInput.disabled = false;
+            if (xhr.status >= 200 && xhr.status < 300) {
+              statusMsg.textContent = 'Upload réussi.';
+              statusMsg.className = 'msg success';
+              // optionally display server response (url, id...)
+              try {
+                const json = JSON.parse(xhr.responseText || '{}');
+                if (json.url) {
+                  const a = document.createElement('a');
+                  a.href = json.url;
+                  a.textContent = 'Voir l\'image';
+                  a.target = '_blank';
+                  previewArea.appendChild(a);
+                }
+              } catch(e) { /* ignore non-json */ }
+            } else {
+              statusMsg.textContent = 'Erreur serveur: ' + xhr.status;
+              statusMsg.classList.add('error');
+            }
+          };
+
+          xhr.onerror = function() {
+            submitBtn.disabled = false;
+            fileInput.disabled = false;
+            statusMsg.textContent = 'Erreur réseau durant l\'upload.';
+            statusMsg.classList.add('error');
+          };
+
+          xhr.send(formData);
+        }).catch(err => {
+          statusMsg.textContent = 'Erreur lors de la vérification du fichier.';
+          statusMsg.classList.add('error');
+        });
+      });
+
+      // clicking the visible label opens the file dialog
+      document.querySelector('.file-input').addEventListener('click', () => fileInput.click());
+      document.querySelector('.file-input').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+
+    })();
+  </script>
+</body>
+</html>
