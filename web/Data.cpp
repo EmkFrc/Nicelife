@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Data.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/28 16:02:50 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/18 23:06:29 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/16 13:54:07 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void	Data::newClient(int listener)
 	struct sockaddr_storage their_addr;
     socklen_t 				addr_size(sizeof(their_addr));
 	int						newFd;
-
+	
 	newFd = accept(listener, (struct sockaddr *)&their_addr, &addr_size);//faire une loop normalement ?
 	if (newFd == -1)
 		exitError();
@@ -91,7 +91,7 @@ void	Data::newClient(int listener)
 			_fds[i].fd = newFd;
 			_fds[i].events = POLLIN;
 			_fdsNbr++;
-			// std::cout << "new Client!" << std::endl;
+			std::cout << "new Client!" << std::endl;
 			return ;
 		}
 	}
@@ -102,31 +102,31 @@ void	Data::clientRequest(int index)
 {
 	std::string				request;
 
-	// std::cout << "New request from client N." << index << "!" << _fds[index].fd <<std::endl;
-
+	std::cout << "New request from client N." << index << "!" << _fds[index].fd <<std::endl;
+	
 	if (_connections.find(_fds[index].fd) == _connections.end())
 	{
 		_connections[_fds[index].fd] = Connection(&_fds[index]);
-		// std::cout << "New connection created for fd " << _fds[index].fd << std::endl;
+		std::cout << "New connection created for fd " << _fds[index].fd << std::endl;
 	}
 	if (_fds[index].revents & POLLIN)
 	{
-		// std::cout << "pollin !" << std::endl;
+		std::cout << "pollin !" << std::endl;
 		_connections[_fds[index].fd].pollIn();
 	}
 	else if (_fds[index].revents & POLLOUT)
 	{
-		// std::cout << "pollout !" << std::endl;
+		std::cout << "pollout !" << std::endl;
 		_connections[_fds[index].fd].pollOut();
 	}
-	// std::cout << "finished" <<std::endl;
+	std::cout << "finished" <<std::endl;
 	if (_connections[_fds[index].fd].closeRequest())
 	{
 		_connections.erase(_fds[index].fd);
 	    close(_fds[index].fd);
 	    _fds[index].fd = -1;
 	    _fdsNbr--;
-		// std::cout << index << "closed !" << std::endl;
+		std::cout << index << "closed !" << std::endl;
 	}
 }
 
@@ -168,7 +168,7 @@ void	Data::pollLoop(void)
 				}
 				else if (_fds[i].revents & POLLHUP || _fds[i].revents & POLLERR)
 				{
-					// std::cout << i << "disconnected !" << std::endl;
+					std::cout << i << "disconnected !" << std::endl;
 					close(_fds[i].fd);
 					_fds[i].fd = -1;
 					pollV--;

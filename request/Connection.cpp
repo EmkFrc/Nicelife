@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/18 23:05:30 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/20 13:22:52 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ void	Connection::recvData(void)
 	size_t	pos;
 
 	if (_expected_length == 0)
-		_read_buf.clear();
+		_read_buf.clear();	
 	while (true)
 	{
 		std ::cout << _fd->fd;
@@ -67,10 +67,6 @@ void	Connection::recvData(void)
 				_env.search_cookie_string(_read_buf);
 				_env.extract_method(_read_buf);
 				_env.parse_headers(_read_buf);
-				_env.parse_body(_read_buf);
-				// std::cout << "==============="<<std::endl;
-
-				// std::cout << "==============="<<std::endl;
 				return ;
 			}
 		}
@@ -103,21 +99,20 @@ void Connection::requestData(void)
 
 void Connection::pollOut(void)
 {
-	std::string response;
-
-	recvData();
+	sendData();
+	_expected_length = 0;
 	_fd->events = POLLIN;
 }
 
 void	Connection::pollIn(void)
 {
 	recvData();
-
+	
 	if (_read_buf.empty())
 		return;
 	if (_close && _expected_length > 0 && _read_buf.size() < _expected_length)
 	{
-		std::cerr << "Connection closed prematurely! Expected " << _expected_length
+		std::cerr << "Connection closed prematurely! Expected " << _expected_length 
 		          << " bytes but got " << _read_buf.size() << std::endl;
 		_expected_length = 0;
 		return;
@@ -163,8 +158,8 @@ void	Connection::pollIn(void)
 		get();
 	else if (_method == "POST")
 		post();
-	_expected_length = 0;
-	_fd->events = POLLOUT;
+	if (!_write_buf.empty())
+		_fd->events = POLLOUT;
 }
 
 bool Connection::closeRequest(void)

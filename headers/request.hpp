@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/19 16:25:30 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/20 13:58:24 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class	Connection
 	void		requestData(void);
 
 	void		send404(void);
-	void		sendResponse(std::string filename);
+	void		setResponse(std::string filename);
 	void		sendIcon(void);
 	void		get(void);
 
@@ -61,14 +61,15 @@ class	Connection
 	void		getFilename(t_upload *data, size_t headersLength);
 	bool		getExec();
 	void		upload(void);
+	void		log(void);
 	void		post(void);
 
 	void		pollOut(void);
 	void		pollIn(void);
 	bool		closeRequest(void);
-
+	
 	private:
-
+	
 	struct pollfd	*_fd;
 	std::string 	_read_buf;
 	std::string		_write_buf;
@@ -83,4 +84,3 @@ class	Connection
 	bool			_executing;
 	bool			_close;
 };
-

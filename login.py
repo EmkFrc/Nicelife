@@ -1,184 +1,180 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import cgi
 import os
 from http.cookies import SimpleCookie
 
-method = os.environ.get("REQUEST_METHOD", "GET")
+# Récupérer les données du formulaire
+form = cgi. FieldStorage()
+username = form.getvalue("username", ""). strip()
 
+# Initialiser les variables
+error_message = ""
+cookie_header = ""
 
-
-if method == "POST":
-    # Traiter le POST
-    form = cgi.FieldStorage()
-    username = form. getvalue("username", "").strip()
-
-    print("Content-Type: text/html; charset=utf-8")
-
-    if username and len(username) >= 3:
-        # Créer cookie
+# Si un username est envoyé (soumission du formulaire)
+if username:
+    if len(username) >= 3:
+        # Créer le cookie
         cookie = SimpleCookie()
-        cookie["username"] = username
-        cookie["username"]["path"] = "/"
-        cookie["username"]["max-age"] = 3600
+        cookie["nicelife_user"] = username
+        cookie["nicelife_user"]["path"] = "/"
+        cookie["nicelife_user"]["max-age"] = 86400  # 24h
+        cookie_header = cookie. output()
 
-        print(cookie.output())
+        # Redirection vers dashboard
+        print("Status: 303 See Other")
+        print(cookie_header)
+        print("Location: /dashboard.py")
         print()
-
-        print(f"""
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Success</title>
-    <style>
-        body {{
-            font-family: Arial;
-            background: #000;
-            color: #fff;
-            padding: 50px;
-            text-align:  center;
-        }}
-        . box {{
-            background: #1a1a1a;
-            border: 2px solid #2DD881;
-            padding: 40px;
-            border-radius:  10px;
-            max-width: 500px;
-            margin: 0 auto;
-        }}
-        a {{
-            display: inline-block;
-            background: #2DD881;
-            color: #000;
-            padding: 15px 40px;
-            text-decoration:  none;
-            border-radius:  5px;
-            margin-top: 20px;
-            font-weight: bold;
-        }}
-    </style>
-</head>
-<body>
-    <div class="box">
-        <h1>✅ Connecté !</h1>
-        <p>Bienvenue <strong>{username}</strong></p>
-        <p>Cookie créé avec succès</p>
-        <a href="/dashboard.py">Dashboard →</a>
-    </div>
-</body>
-</html>
-        """)
+        exit()
     else:
-        print()
-        print("""
-<html>
-<body style="background:#000;color:#fff;text-align:center;padding:50px;">
-    <h1>❌ Erreur</h1>
-    <p>Username doit avoir 3+ caractères</p>
-    <a href="/login.py" style="color:#2DD881;">Réessayer</a>
-</body>
-</html>
-        """)
-else:
-    # Afficher formulaire
-    print("Content-Type: text/html; charset=utf-8")
-    print()
+        error_message = "⚠️ Le pseudo doit contenir au moins 3 caractères"
 
-    print("""
-<!  DOCTYPE html>
-<html>
+# Afficher le formulaire HTML
+print("Content-Type: text/html; charset=utf-8")
+print()
+
+html = f"""<! DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Connexion - NiceLife 🌳</title>
+    <link rel="stylesheet" href="/nicelife-style.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background:  #000;
-            color: #fff;
-            padding: 50px;
-            margin: 0;
-        }
-        .container {
+        . login-container {{
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }}
+        .login-box {{
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3rem;
             max-width: 400px;
-            margin: 0 auto;
-            background: #1a1a1a;
-            padding: 40px;
-            border-radius:  10px;
-            border: 2px solid #2DD881;
-        }
-        h1 {
-            color: #2DD881;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+            position: relative;
+            z-index: 10;
+        }}
+        .login-title {{
             text-align: center;
-            margin-bottom: 30px;
-        }
-        label {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #FFFFFF;
+        }}
+        . login-subtitle {{
+            text-align: center;
+            color: #B0B0B0;
+            margin-bottom: 2rem;
+        }}
+        .form-group {{
+            margin-bottom: 1.5rem;
+        }}
+        .form-label {{
             display: block;
-            margin-bottom: 10px;
-            color: #ccc;
-        }
-        input[type="text"] {
+            margin-bottom: 0. 5rem;
+            color: #B0B0B0;
+            font-size: 0.9rem;
+        }}
+        .form-input {{
             width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            background: #0a0a0a;
-            border: 1px solid #2DD881;
-            border-radius: 5px;
-            color: #fff;
-            box-sizing: border-box;
-        }
-        input[type="text"]:focus {
-            outline:  none;
-            border-color:  #5FE9A0;
-        }
-        button {
+            padding: 0.9rem;
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #FFFFFF;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }}
+        .form-input:focus {{
+            outline: none;
+            border-color: #2DD881;
+            box-shadow: 0 0 0 3px rgba(45, 216, 129, 0.1);
+        }}
+        .btn-submit {{
             width: 100%;
-            padding:  15px;
-            margin-top: 20px;
+            padding: 1rem;
             background: #2DD881;
-            color: #000;
+            color: #000000;
             border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1. 1rem;
             cursor: pointer;
-        }
-        button:hover {
+            transition: all 0.3s ease;
+        }}
+        .btn-submit:hover {{
             background: #5FE9A0;
-        }
-        .info {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(45, 216, 129, 0.1);
-            border-radius: 5px;
-            font-size: 14px;
-            color: #999;
-        }
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(45, 216, 129, 0.4);
+        }}
+        .error-message {{
+            background: rgba(255, 69, 58, 0.1);
+            border: 1px solid rgba(255, 69, 58, 0.3);
+            color: #FF453A;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1. 5rem;
+            text-align: center;
+        }}
+        .back-link {{
+            display: block;
+            text-align: center;
+            margin-top: 1. 5rem;
+            color: #B0B0B0;
+            transition: color 0.3s ease;
+        }}
+        .back-link:hover {{
+            color: #2DD881;
+        }}
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🌳 Login</h1>
+    <div class="particles">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
 
-        <form method="POST" action="/login.py">
-            <label for="username">Username</label>
-            <input
-                type="text"
-                id="username"
-                name="username"
-                placeholder="Votre username"
-                required
-                minlength="3"
-                autofocus
-            >
+    <div class="login-container">
+        <div class="login-box">
+            <h1 class="login-title">🌳 NiceLife</h1>
+            <p class="login-subtitle">Connectez-vous pour continuer</p>
 
-            <button type="submit">Se connecter</button>
-        </form>
+            {"<div class='error-message'>" + error_message + "</div>" if error_message else ""}
 
-        <div class="info">
-            💡 Entrez au moins 3 caractères
+            <form method="POST" action="/login.py">
+                <div class="form-group">
+                    <label class="form-label" for="username">Votre pseudo</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        class="form-input"
+                        placeholder="Entrez votre pseudo"
+                        value="{username}"
+                        required
+                        autofocus
+                    >
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Se connecter →
+                </button>
+            </form>
+
+            <a href="/" class="back-link">← Retour à l'accueil</a>
         </div>
     </div>
 </body>
-</html>
-    """)
+</html>"""
+
+print(html)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGIExecution.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/28 13:35:37 by efranco           #+#    #+#             */
-/*   Updated: 2025/12/18 23:05:06 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/19 14:51:34 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,5 @@ inline std::string build_cgi_response(CGIExecution *cgi, std::map<std::string,
 	}
 	response.setStatus(status_code);
 	response.setBody(cgi->cgi_body);
-	// std::cout << "!!!!!!!!!" << cgi->cgi_body << "!!!!!!!!!!" << std::endl;
 	return response.build();
 }

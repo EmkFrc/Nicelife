@@ -1,233 +1,281 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+import json
 import os
-import sys
-from http.cookies import SimpleCookie
+from http. cookies import SimpleCookie
+from pathlib import Path
 
-# ═══════════════════════════════════════════════════════════
-# LOGS pour debug
-# ═══════════════════════════════════════════════════════════
-
-try:
-    with open("/tmp/dashboard_debug. log", "w") as log:
-        log.write("=== DASHBOARD STARTED ===\n")
-        log.write(f"REQUEST_METHOD: {os.environ.get('REQUEST_METHOD', 'NONE')}\n")
-        log.write(f"HTTP_COOKIE: {os.environ.get('HTTP_COOKIE', 'NONE')}\n")
-        log.write(f"SCRIPT_NAME: {os.environ. get('SCRIPT_NAME', 'NONE')}\n")
-
-        # Lire cookie
-        cookie_string = os.environ.get("HTTP_COOKIE", "")
-        log.write(f"Cookie string: [{cookie_string}]\n")
-
-        cookie = SimpleCookie()
-        cookie.load(cookie_string)
-
-        log.write(f"Cookie parsed: {cookie}\n")
-
-        username = ""
-        if "username" in cookie:
-            username = cookie["username"].value
-            log.write(f"Username found: [{username}]\n")
-        else:
-            log.write("No username in cookie\n")
-
-        log.write("=== GENERATING HTML ===\n")
-except Exception as e:
-    # Si le log plante, on continue quand même
-    username = ""
-
-# ═══════════════════════════════════════════════════════════
-# TOUJOURS envoyer des headers HTTP
-# ═══════════════════════════════════════════════════════════
-
-print("Content-Type: text/html; charset=utf-8")
-print()
-
-# ═══════════════════════════════════════════════════════════
-# Récupérer le cookie (même code que dans les logs)
-# ═══════════════════════════════════════════════════════════
-
-cookie_string = os.environ.get("HTTP_COOKIE", "")
+# Récupérer le cookie
+cookie_string = os.environ. get("HTTP_COOKIE", "")
 cookie = SimpleCookie()
 cookie.load(cookie_string)
 
 username = ""
-if "username" in cookie:
-    username = cookie["username"].value
 
-# ═══════════════════════════════════════════════════════════
-# HTML selon si connecté ou non
-# ═══════════════════════════════════════════════════════════
+# Essayer plusieurs noms de cookies
+if "nicelife_user" in cookie:
+    username = cookie["nicelife_user"]. value
+elif "username" in cookie:
+    username = cookie["username"]. value
 
-if username:
-    # ════════════════════════════════════════════════════════
-    # CONNECTÉ
-    # ════════════════════════════════════════════════════════
-    print(f"""<! DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard - {username}</title>
-    <style>
-        body {{
-            background: #000;
-            color:  #fff;
-            font-family: Arial;
-            padding: 50px;
-            text-align: center;
-        }}
-        .box {{
-            background: #1a1a1a;
-            border: 2px solid #2DD881;
-            padding: 40px;
-            border-radius: 10px;
-            max-width: 600px;
-            margin: 0 auto;
-        }}
-        h1 {{
-            color:  #2DD881;
-            font-size: 2.5rem;
-        }}
-        .username {{
-            font-size: 2rem;
-            color: #5FE9A0;
-            margin:  20px 0;
-        }}
-        .info {{
-            background: rgba(45, 216, 129, 0.1);
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }}
-        a {{
-            display: inline-block;
-            background: #ff4444;
-            color: #fff;
-            padding: 15px 40px;
-            text-decoration:  none;
-            border-radius:  5px;
-            margin:  10px;
-            font-weight: bold;
-        }}
-        a:hover {{
-            background: #ff6666;
-        }}
-        .debug {{
-            margin-top: 30px;
-            padding: 20px;
-            background: #0a0a0a;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            text-align: left;
-        }}
-    </style>
-</head>
-<body>
-    <div class="box">
-        <h1>✅ Dashboard</h1>
-        <div class="username">Bienvenue {username} !</div>
+# Si pas de cookie → rediriger vers login
+if not username:
+    print("Status: 303 See Other")
+    print("Location: /login. py")
+    print()
+    exit()
 
-        <div class="info">
-            <p>🍪 Cookie actif</p>
-            <p>✓ Session valide</p>
-            <p>✓ Requête GET traitée</p>
-        </div>
+# Créer le dossier data
+data_dir = Path("data")
+data_dir.mkdir(exist_ok=True)
 
-        <a href="/">🏠 Accueil</a>
-        <a href="/logout.py">🚪 Déconnexion</a>
+# Chemin du fichier
+tasks_file = data_dir / f"{username}_tasks.json"
 
-        <div class="debug">
-            <strong>Debug Info:</strong><br>
-            HTTP_COOKIE = {cookie_string}<br>
-            username = {username}<br>
-            REQUEST_METHOD = {os.environ.get('REQUEST_METHOD', 'N/A')}<br>
-            <br>
-            Logs:  /tmp/dashboard_debug.log
-        </div>
-    </div>
-</body>
-</html>""")
-
+# Charger les tâches
+if tasks_file.exists():
+    with open(tasks_file, "r", encoding="utf-8") as f:
+        tasks = json.load(f)
 else:
-    # ════════════════════════════════════════════════════════
-    # NON CONNECTÉ
-    # ════════════════════════════════════════════════════════
-    print("""<!DOCTYPE html>
-<html>
+    tasks = []
+
+# Générer le HTML
+print("Content-Type: text/html; charset=utf-8")
+print()
+
+# Générer les tâches
+tasks_html = ""
+for task in tasks:
+    checked = "checked" if task["done"] else ""
+    done_class = "task-done" if task["done"] else ""
+
+    tasks_html += f"""
+    <div class="task-item {done_class}">
+        <form method="POST" action="/toggle-task.py" class="task-form">
+            <input type="hidden" name="username" value="{username}">
+            <input type="hidden" name="task_id" value="{task['id']}">
+            <input
+                type="checkbox"
+                name="done"
+                class="task-checkbox"
+                {checked}
+                onchange="this.form.submit()"
+            >
+        </form>
+
+        <span class="task-title">{task['title']}</span>
+
+        <form method="POST" action="/delete-task.py" class="task-delete-form">
+            <input type="hidden" name="username" value="{username}">
+            <input type="hidden" name="task_id" value="{task['id']}">
+            <button type="submit" class="btn-delete">🗑️</button>
+        </form>
+    </div>
+    """
+
+if not tasks:
+    tasks_html = "<p class='no-tasks'>✨ Aucune tâche pour le moment.  Ajoutez-en une !</p>"
+
+html = f"""<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Non connecté</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - NiceLife 🌳</title>
+    <link rel="stylesheet" href="/nicelife-style.css">
     <style>
-        body {
-            background: #1a0000;
-            color: #fff;
-            font-family: Arial;
-            padding: 50px;
-            text-align: center;
-        }
-        . box {
-            background: rgba(255, 69, 58, 0.1);
-            border: 2px solid #ff4444;
-            padding: 40px;
-            border-radius: 10px;
-            max-width: 500px;
+        . dashboard-container {{
+            min-height: 100vh;
+            padding: 6rem 0 2rem 0;
+            position: relative;
+            z-index: 10;
+        }}
+        .dashboard-box {{
+            max-width: 700px;
             margin: 0 auto;
-        }
-        h1 {
-            color:  #ff4444;
-            font-size: 3rem;
-        }
-        a {
-            display: inline-block;
-            background: #2DD881;
-            color: #000;
-            padding: 15px 40px;
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+        }}
+        .dashboard-header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }}
+        .welcome-text {{
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #FFFFFF;
+        }}
+        .username-highlight {{
+            color: #2DD881;
+        }}
+        .btn-logout {{
+            background: transparent;
+            color: #B0B0B0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0. 5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-weight: bold;
-        }
-        a:hover {
+        }}
+        .btn-logout:hover {{
+            background: rgba(255, 69, 58, 0.1);
+            border-color: rgba(255, 69, 58, 0. 3);
+            color: #FF453A;
+        }}
+        .tasks-section {{
+            margin-bottom: 2rem;
+        }}
+        .section-subtitle {{
+            font-size: 1.2rem;
+            color: #B0B0B0;
+            margin-bottom: 1. 5rem;
+        }}
+        .task-item {{
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }}
+        . task-item:hover {{
+            border-color: rgba(45, 216, 129, 0.3);
+            background: rgba(45, 216, 129, 0.05);
+        }}
+        .task-form {{
+            display: flex;
+        }}
+        .task-checkbox {{
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #2DD881;
+        }}
+        .task-title {{
+            flex: 1;
+            color: #FFFFFF;
+        }}
+        .task-done . task-title {{
+            text-decoration: line-through;
+            color: #666666;
+        }}
+        .btn-delete {{
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }}
+        .btn-delete:hover {{
+            opacity: 1;
+            transform: scale(1.2);
+        }}
+        .no-tasks {{
+            text-align: center;
+            color: #B0B0B0;
+            padding: 3rem;
+            font-style: italic;
+        }}
+        .add-task-form {{
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }}
+        .task-input {{
+            flex: 1;
+            padding: 0.9rem;
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #FFFFFF;
+            font-size: 1rem;
+        }}
+        .task-input:focus {{
+            outline: none;
+            border-color: #2DD881;
+            box-shadow: 0 0 0 3px rgba(45, 216, 129, 0.1);
+        }}
+        .btn-add {{
+            background: #2DD881;
+            color: #000000;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }}
+        .btn-add:hover {{
             background: #5FE9A0;
-        }
-        .debug {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(45, 216, 129, 0.4);
+        }}
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>🔒</h1>
-        <h2>Non connecté</h2>
-        <p>Aucun cookie trouvé</p>
-        <p>Vous devez vous connecter d'abord</p>
+    <div class="particles">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
 
-        <a href="/login.py">Se connecter →</a>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-icon">🌳</span>
+                <span class="logo-text">NiceLife</span>
+            </div>
+            <div class="nav-links">
+                <a href="/logout.py" class="btn-nav">Se déconnecter</a>
+            </div>
+        </div>
+    </nav>
 
-        <div class="debug">
-            <strong>Debug: </strong><br>
-            HTTP_COOKIE = """ + cookie_string + """<br>
-            Cookie vide ou invalide<br>
-            <br>
-            Logs: /tmp/dashboard_debug.log
+    <div class="dashboard-container">
+        <div class="container">
+            <div class="dashboard-box">
+                <div class="dashboard-header">
+                    <h1 class="welcome-text">
+                        Bonjour <span class="username-highlight">{username}</span> ! 🌳
+                    </h1>
+                </div>
+
+                <div class="tasks-section">
+                    <h2 class="section-subtitle">Vos tâches du jour</h2>
+                    {tasks_html}
+                </div>
+
+                <form method="POST" action="/add-task.py" class="add-task-form">
+                    <input type="hidden" name="username" value="{username}">
+                    <input
+                        type="text"
+                        name="title"
+                        class="task-input"
+                        placeholder="Nouvelle tâche..."
+                        required
+                        autofocus
+                    >
+                    <button type="submit" class="btn-add">Ajouter</button>
+                </form>
+            </div>
         </div>
     </div>
 </body>
-</html>""")
+</html>"""
 
-# ═══════════════════════════════════════════════════════════
-# Log final
-# ═══════════════════════════════════════════════════════════
-
-try:
-    with open("/tmp/dashboard_debug.log", "a") as log:
-        log. write("=== HTML SENT ===\n")
-        log.write(f"Username in response: [{username}]\n")
-except:
-    pass
+print(html)

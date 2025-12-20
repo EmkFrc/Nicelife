@@ -3,16 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   get.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/19 16:25:33 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/20 13:58:43 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "request.hpp"
 
+bool	is_cgi(const std::string &str)
+{
+	size_t	i;
 
+	i = str.find_last_of('.');
+	if (i != std::string::npos)
+	{
+		std::string tmp = str.substr(i);
+		if (tmp == ".php" || tmp == ".py" || tmp == ".sh")
+			return (true);
+	}
+	return (false);
+}
 
 void	Connection::send404(void)
 {
@@ -21,13 +33,11 @@ void	Connection::send404(void)
 	_response.setBody("<h1>404 - File Not Found</h1>");
 	_write_buf.clear();
 	_write_buf = _response.build();
-    sendData();
-	_fd->events = POLLOUT;
 }
 
-void	Connection::sendResponse(std::string filename)
+void	Connection::setResponse(std::string filename)
 {
-	// std::cout << "reponse" << std::endl;
+	std::cout << "reponse" << std::endl;
 	std::ifstream	file(filename.c_str(), std::ios::binary);
 	std::string		length;
 	std::ostringstream size;
@@ -45,15 +55,14 @@ void	Connection::sendResponse(std::string filename)
 	// _write_buf += "Content-Length" + length + "\r\n";//TODO faire content length
 	_write_buf.clear();
 	_write_buf = _response.build();
-	// std::cout << "------------------------" << std::endl;
-	// std::cout << _write_buf << std::endl;
-	// std::cout << "------------------------" << std::endl;
-	sendData();
+	std::cout << "------------------------" << std::endl;
+	std::cout << _write_buf.substr(0, 500) << std::endl;
+	std::cout << "------------------------" << std::endl;
 }
 
 void	Connection::sendIcon(void)
 {
-// 	std::cout << "icon" << std::endl;
+	std::cout << "icon" << std::endl;
 	std::ifstream	icon("website/Imran.ico", std::ios::binary);
 	std::string		length;
 	std::ostringstream size;
@@ -72,33 +81,20 @@ void	Connection::sendIcon(void)
     _write_buf += "Connection: keep-alive\r\n";
     _write_buf += "\r\n";
     _write_buf += content;
-    sendData();
 }
-bool	is_cgi(const std::string &str)
-{
-	size_t	i;
 
-	i = str.find_last_of('.');
-	if (i != std::string::npos)
-	{
-		std::string tmp = str.substr(i);
-		if (tmp == ".php" || tmp == ".py" || tmp == ".sh")
-			return (true);
-	}
-	return (false);
-}
 void	Connection::get(void)
 {
 	if (is_cgi(_uri))
         start_cgi();
 	else if (_uri == "/")
-		sendResponse("website/home.html");
+		setResponse("website/home.html");
 	else if (_uri == "/favicon.ico")
 		sendIcon();
 	else if (_uri == "/upload")
-		sendResponse("website/upload.html");
+		setResponse("website/upload.html");
 	else if (_uri == "/nicelife-style.css")
-		sendResponse("website/nicelife-style.css");
+		setResponse("website/nicelife-style.css");
 	else
 		send404();
 }

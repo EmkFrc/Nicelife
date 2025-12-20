@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Env.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/02 18:28:02 by efranco           #+#    #+#             */
-/*   Updated: 2025/12/18 21:53:03 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/16 14:10:09 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ class Env
 	std::string Query_string;
 	std::string Cookie_string;
 	std::string method;
-	std::string body;
 	std::map<std::string, std::string> headers;
 
   public:
@@ -70,28 +69,28 @@ class Env
 	};
 	void extract_method(std::string &httpRequest)
 	{
-    size_t pos = httpRequest.find("\r\n");
-    if (pos != std::string::npos)
-    {
-        std::string first_line = httpRequest. substr(0, pos);
-
-        size_t pos_space = first_line.find(' ');
-        if (pos_space == std::string::npos)
-            return ;
-        method = first_line.substr(0, pos_space);
-
-        std::string new_line = first_line.substr(pos_space + 1);
-        pos_space = new_line.find(' ');
-        if (pos_space == std::string::npos)
-            return ;
-        std::string uri = new_line. substr(0, pos_space);
-
-        size_t pos_question = uri. find('?');
-        if (pos_question != std::string::npos)
-            Query_string = uri.substr(pos_question + 1);
-        else
-            Query_string = "";
-    }
+    	size_t pos = httpRequest.find("\r\n");
+    	if (pos != std::string::npos)
+    	{
+    	    std::string first_line = httpRequest. substr(0, pos);
+		
+    	    size_t pos_space = first_line.find(' ');
+    	    if (pos_space == std::string::npos)
+    	        return ;
+    	    method = first_line.substr(0, pos_space);
+		
+    	    std::string new_line = first_line.substr(pos_space + 1);
+    	    pos_space = new_line.find(' ');
+    	    if (pos_space == std::string::npos)
+    	        return ;
+    	    std::string uri = new_line. substr(0, pos_space);
+		
+    	    size_t pos_question = uri. find('?');
+    	    if (pos_question != std::string::npos)
+    	        Query_string = uri.substr(pos_question + 1);
+    	    else
+    	        Query_string = "";
+    	}
 	}
 	void search_cookie_string(std::string &httpRequest)
 	{
@@ -112,16 +111,6 @@ class Env
 			return ;
 		}
 		Cookie_string = Cookie_str_mid.substr(0, pos_end);
-	}
-	void parse_body(std::string &httpRequest)
-	{
-		size_t pos = httpRequest.find("\r\n\r\n");
-		if (pos == std::string::npos)
-		{
-			body = "";
-			return;
-		}
-		body = httpRequest.substr(pos + 4);
 	}
 	void parse_headers(std::string &httpRequest)
 	{
@@ -185,10 +174,6 @@ class Env
 	const std::string &get_query_string() const
 	{
 		return (Query_string);
-	}
-	const std::string &get_body() const
-	{
-		return (body);
 	}
 	const std::string &get_Cookie_string() const
 	{

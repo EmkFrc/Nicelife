@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 09:15:35 by efranco           #+#    #+#             */
-/*   Updated: 2025/12/18 23:05:10 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/11 19:18:38 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,13 +65,13 @@ class Response
 
 	std::string get_content_type(const std::string &path)
 	{
-		// std::cout << "++++++++++++++++++++++++" << path << "+++++++++++++++++++" << std::endl;
+		std::cout << "++++++++++++++++++++++++" << path << "+++++++++++++++++++" << std::endl;
     	size_t dot_pos = path.find_last_of('.');
     	if (dot_pos == std::string::npos)
     	    return "text/plain";
-
+		
     	std::string extension = path.substr(dot_pos);
-
+		
     	if (extension == ".html" || extension == ".htm")
     	    return "text/html; charset=utf-8";
     	else if (extension == ".css")

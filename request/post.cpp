@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   post.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 13:52:30 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/19 18:05:42 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/20 13:22:39 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "request.hpp"
-
 
 void	Connection::getFilename(t_upload *data, size_t headersLength)
 {
@@ -73,10 +72,10 @@ void	Connection::upload(void)
 	std::cout << data.filename << "   Content-Length body: " << data.contentLength << std::endl;
 	if (data.filename.empty())
 		return ;
-
+	
 	// Début du fichier = après le 2ème \r\n\r\n
 	start = end + 4;
-
+	
 	// Trouver la fin du fichier (avant le boundary de fermeture)
 	end = _read_buf.find("\r\n--", start);
 	if (end == std::string::npos)
@@ -87,38 +86,40 @@ void	Connection::upload(void)
 		std::cerr << "Last 200 chars:\n[" << _read_buf.substr(_read_buf.size() - 200) << "]" << std::endl;
 		return ;
 	}
-
+	
 	file_size = end - start;
 	std::cout << "File size: " << file_size << " bytes (from pos " << start << " to " << end << ")" << std::endl;
-
+	
 	std::ofstream file(data.filename.c_str(), std::ios::binary);
 	if (!file)
 	{
     	std::cerr << "Error: file creation failed" << std::endl;
    		return;
 	}
-
+	
 	file.write(_read_buf.c_str() + start, file_size);
 	file.close();
 	std::cout << "File uploaded successfully: " << data.filename << std::endl;
+	// _write_buf.clear();
+	// _write_buf = _response.build();
+	// std::cout << "------------------------" << std::endl;//TODO supp plus tard
+	// std::cout << _write_buf << std::endl;
+	// std::cout << "------------------------" << std::endl;
+	// sendData();
 }
-bool	is_cgi_post(const std::string &str)
-{
-	size_t	i;
 
-	i = str.find_last_of('.');
-	if (i != std::string::npos)
-	{
-		std::string tmp = str.substr(i);
-		if (tmp == ".php" || tmp == ".py" || tmp == ".sh")
-			return (true);
-	}
-	return (false);
+void	Connection::log(void)
+{
+	// _write_buf.clear();
+	// _write_buf = _response.build();
+	// std::cout << "------------------------" << std::endl;//TODO supp plus tard
+	// std::cout << _write_buf << std::endl;
+	// std::cout << "------------------------" << std::endl;
+	// sendData();
 }
+
 void	Connection::post(void)
 {
-	if (is_cgi_post(_uri))
-        start_cgi();
 	if (_read_buf.find("Transfer-Encoding: chunked") != _read_buf.npos)
 	{
 	//TODO send 411 Length Required
@@ -126,6 +127,6 @@ void	Connection::post(void)
 	}
 	if (_uri == "/upload")
 		upload();
-	// else if (_uri == "/login.py")
-	// 	add_env
+	else if (_uri == "/login.py")
+		log();
 }
