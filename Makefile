@@ -6,7 +6,7 @@
 #    By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/05 15:41:03 by nmartin           #+#    #+#              #
-#    Updated: 2025/12/11 19:06:29 by nmartin          ###   ########.fr        #
+#    Updated: 2025/12/20 20:59:48 by nmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,7 @@ WEB_PATH = ./web/
 WEB_FILES = main.cpp Data.cpp
 WEB := $(addprefix $(WEB_PATH), $(WEB_FILES))
 REQUEST_PATH = ./request/
-REQUEST_FILES = Connection.cpp get.cpp post.cpp CGI.cpp
+REQUEST_FILES = Connection.cpp get.cpp post.cpp delete.cpp CGI.cpp
 REQUEST := $(addprefix $(REQUEST_PATH), $(REQUEST_FILES))
 OBJ_PATH = ./objs/
 OBJ := $(addprefix $(OBJ_PATH), $(WEB_FILES:.cpp=.o)) \

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Data.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/28 16:02:50 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/18 23:06:29 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/20 20:59:08 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,6 +156,13 @@ void	Data::pollLoop(void)
 					continue;
 				else if (_connections.find(_fds[i].fd) != _connections.end() && _connections[_fds[i].fd].getExec())
 					_connections[_fds[i].fd].handle_executing_cgi();
+				else if (_fds[i].revents & POLLHUP || _fds[i].revents & POLLERR)
+				{
+					std::cout << i << "disconnected !" << std::endl;
+					close(_fds[i].fd);
+					_fds[i].fd = -1;
+					pollV--;
+				}
 				else if (_fds[i].revents & POLLIN)
 				{
 					clientRequest(i);
@@ -166,13 +173,7 @@ void	Data::pollLoop(void)
 					clientRequest(i);
 					pollV--;
 				}
-				else if (_fds[i].revents & POLLHUP || _fds[i].revents & POLLERR)
-				{
-					// std::cout << i << "disconnected !" << std::endl;
-					close(_fds[i].fd);
-					_fds[i].fd = -1;
-					pollV--;
-				}
+				
 			}
 		}
 	}

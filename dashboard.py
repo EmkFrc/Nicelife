@@ -135,7 +135,32 @@ if username:
         </div>
 
         <a href="/">🏠 Accueil</a>
-        <a href="/logout.py">🚪 Déconnexion</a>
+        <a href="#" id="logout-btn">🚪 Déconnexion</a>
+
+        <script>
+        document.getElementById('logout-btn').addEventListener('click', function(e) {{
+            e.preventDefault();
+            console.log('Bouton déconnexion cliqué');
+            
+            fetch('/logout.py', {{
+                method: 'DELETE',
+                headers: {{
+                    'Content-Type': 'application/json'
+                }}
+            }})
+            .then(response => {{
+                console.log('Réponse reçue:', response.status);
+                if (response.ok) {{
+                    window.location.href = '/';
+                }} else {{
+                    console.error('Erreur lors de la déconnexion');
+                }}
+            }})
+            .catch(error => {{
+                console.error('Erreur réseau:', error);
+            }});
+        }});
+        </script>
 
         <div class="debug">
             <strong>Debug Info:</strong><br>

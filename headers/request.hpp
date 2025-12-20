@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/19 16:25:30 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/20 20:56:29 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,8 @@ class	Connection
 	bool		getExec();
 	void		upload(void);
 	void		post(void);
+
+	void		deleteRq(void);
 
 	void		pollOut(void);
 	void		pollIn(void);

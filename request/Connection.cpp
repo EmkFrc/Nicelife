@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/18 23:05:30 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/20 20:55:58 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,9 +103,7 @@ void Connection::requestData(void)
 
 void Connection::pollOut(void)
 {
-	std::string response;
-
-	recvData();
+	sendData();
 	_fd->events = POLLIN;
 }
 
@@ -163,6 +161,8 @@ void	Connection::pollIn(void)
 		get();
 	else if (_method == "POST")
 		post();
+	else if (_method == "DELETE")
+		deleteRq();
 	_expected_length = 0;
 	_fd->events = POLLOUT;
 }

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
+import os
 from http.cookies import SimpleCookie
+
+# Récupérer la méthode HTTP
+request_method = os.environ.get("REQUEST_METHOD", "GET")
 
 # Supprimer le cookie
 cookie = SimpleCookie()
@@ -8,12 +12,19 @@ cookie["username"] = ""
 cookie["username"]["path"] = "/"
 cookie["username"]["max-age"] = 0
 
-# Afficher une page HTML avec redirection automatique
-print("Content-Type: text/html; charset=utf-8")
-print(cookie.output())
-print()
+if request_method == "DELETE":
+    # Réponse pour requête DELETE (AJAX)
+    print("Content-Type: application/json; charset=utf-8")
+    print(cookie.output())
+    print()
+    print('{"status": "success", "message": "Cookie deleted"}')
+else:
+    # Réponse pour requête GET (lien direct)
+    print("Content-Type: text/html; charset=utf-8")
+    print(cookie.output())
+    print()
 
-html = """<!DOCTYPE html>
+    html = """<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -34,7 +45,7 @@ html = """<!DOCTYPE html>
             border-radius: 10px;
             display: inline-block;
         }
-        . spinner {
+        .spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-top: 4px solid #fff;
             border-radius: 50%;
@@ -59,4 +70,4 @@ html = """<!DOCTYPE html>
 </body>
 </html>"""
 
-print(html)
+    print(html)

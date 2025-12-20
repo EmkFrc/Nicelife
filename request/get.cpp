@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   get.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/19 16:25:33 by efranco          ###   ########.fr       */
+/*   Updated: 2025/12/20 17:11:34 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "request.hpp"
-
-
 
 void	Connection::send404(void)
 {
@@ -21,8 +19,8 @@ void	Connection::send404(void)
 	_response.setBody("<h1>404 - File Not Found</h1>");
 	_write_buf.clear();
 	_write_buf = _response.build();
-    sendData();
-	_fd->events = POLLOUT;
+	if (!_write_buf.empty())
+		_fd->events = POLLOUT;
 }
 
 void	Connection::sendResponse(std::string filename)
@@ -48,7 +46,8 @@ void	Connection::sendResponse(std::string filename)
 	// std::cout << "------------------------" << std::endl;
 	// std::cout << _write_buf << std::endl;
 	// std::cout << "------------------------" << std::endl;
-	sendData();
+	if (!_write_buf.empty())
+		_fd->events = POLLOUT;
 }
 
 void	Connection::sendIcon(void)
@@ -72,7 +71,8 @@ void	Connection::sendIcon(void)
     _write_buf += "Connection: keep-alive\r\n";
     _write_buf += "\r\n";
     _write_buf += content;
-    sendData();
+    if (!_write_buf.empty())
+		_fd->events = POLLOUT;
 }
 bool	is_cgi(const std::string &str)
 {
@@ -95,10 +95,10 @@ void	Connection::get(void)
 		sendResponse("website/home.html");
 	else if (_uri == "/favicon.ico")
 		sendIcon();
-	else if (_uri == "/upload")
-		sendResponse("website/upload.html");
-	else if (_uri == "/nicelife-style.css")
-		sendResponse("website/nicelife-style.css");
 	else
-		send404();
+	{
+		std::string	page("/website");
+		page += _uri;
+		sendResponse(page);
+	}
 }
