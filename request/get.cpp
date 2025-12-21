@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/20 17:11:34 by nmartin          ###   ########.fr       */
+/*   Updated: 2025/12/21 01:48:14 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,10 @@ void	Connection::send404(void)
 	_response.setBody("<h1>404 - File Not Found</h1>");
 	_write_buf.clear();
 	_write_buf = _response.build();
-	if (!_write_buf.empty())
-		_fd->events = POLLOUT;
 }
 
 void	Connection::sendResponse(std::string filename)
 {
-	// std::cout << "reponse" << std::endl;
 	std::ifstream	file(filename.c_str(), std::ios::binary);
 	std::string		length;
 	std::ostringstream size;
@@ -40,14 +37,11 @@ void	Connection::sendResponse(std::string filename)
 	_response.setStatus(200);
 	_response.addHeader("Content-Type", _response.get_content_type(filename));
 	_response.setBody(content);
-	// _write_buf += "Content-Length" + length + "\r\n";//TODO faire content length
 	_write_buf.clear();
 	_write_buf = _response.build();
 	// std::cout << "------------------------" << std::endl;
 	// std::cout << _write_buf << std::endl;
 	// std::cout << "------------------------" << std::endl;
-	if (!_write_buf.empty())
-		_fd->events = POLLOUT;
 }
 
 void	Connection::sendIcon(void)
@@ -71,8 +65,6 @@ void	Connection::sendIcon(void)
     _write_buf += "Connection: keep-alive\r\n";
     _write_buf += "\r\n";
     _write_buf += content;
-    if (!_write_buf.empty())
-		_fd->events = POLLOUT;
 }
 bool	is_cgi(const std::string &str)
 {

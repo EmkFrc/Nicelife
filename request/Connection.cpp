@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/20 20:55:58 by nmartin          ###   ########.fr       */
+/*   Updated: 2025/12/21 01:47:54 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,9 +68,6 @@ void	Connection::recvData(void)
 				_env.extract_method(_read_buf);
 				_env.parse_headers(_read_buf);
 				_env.parse_body(_read_buf);
-				// std::cout << "==============="<<std::endl;
-
-				// std::cout << "==============="<<std::endl;
 				return ;
 			}
 		}
@@ -164,7 +161,8 @@ void	Connection::pollIn(void)
 	else if (_method == "DELETE")
 		deleteRq();
 	_expected_length = 0;
-	_fd->events = POLLOUT;
+	if (!_write_buf.empty())
+		_fd->events = POLLOUT;
 }
 
 bool Connection::closeRequest(void)

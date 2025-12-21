@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 13:52:30 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/20 14:17:55 by nmartin          ###   ########.fr       */
+/*   Updated: 2025/12/21 01:46:35 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,12 +119,7 @@ void	Connection::post(void)
 	if (is_cgi_post(_uri))
         start_cgi();
 	if (_read_buf.find("Transfer-Encoding: chunked") != _read_buf.npos)
-	{
-	//TODO send 411 Length Required
 		return ;
-	}
 	if (_uri == "/upload")
 		upload();
-	// else if (_uri == "/login.py")
-	// 	add_env
 }
