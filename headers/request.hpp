@@ -6,7 +6,7 @@
 /*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/19 16:25:30 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/06 20:09:29 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,8 @@ class	Connection
 	void		upload(void);
 	void		post(void);
 
+	void		delete_function(void);
+
 	void		pollOut(void);
 	void		pollIn(void);
 	bool		closeRequest(void);
@@ -72,6 +74,7 @@ class	Connection
 	struct pollfd	*_fd;
 	std::string 	_read_buf;
 	std::string		_write_buf;
+	std::string		_path_upload;
 	size_t			_write_offset;
 	size_t			_expected_length;
 	std::string 	_method;

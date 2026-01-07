@@ -6,7 +6,7 @@
 /*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/18 23:05:30 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/06 21:47:53 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,120 @@ void Connection::pollOut(void)
 	recvData();
 	_fd->events = POLLIN;
 }
+bool	is_cgi_d(const std::string &str)
+{
+	size_t	i;
 
+	i = str.find_last_of('.');
+	if (i != std::string::npos)
+	{
+		std::string tmp = str.substr(i);
+		if (tmp == ".php" || tmp == ".py" || tmp == ".sh")
+			return (true);
+	}
+	return (false);
+}
+bool is_uploads(const std::string& str, std::string& stock)
+{
+	size_t i;
+	std::string tmp;
+	if (str[0] == '/')
+		tmp = str.substr(1);
+	else
+		return (false);
+	i = tmp.find_first_of('/');
+	if (i != std::string::npos)
+	{
+		std::string new_str = tmp.substr(0, i + 1);
+		if (new_str == "uploads/")
+		{
+			stock = tmp.substr(i + 1);
+			 return (true);
+		}
+	}
+	return (false);
+}
+bool verif_path_traversal(const std::string& str)
+{
+	if (str[0] == '/')
+	{
+		return (false);
+	}
+	if (str.find("//") != std::string::npos)
+	{
+		return (false);
+	}
+	return (true);
+}
+bool verif_extension(const std::string& str)
+{
+
+	size_t i = str.find_last_of('.');
+	if (i != std::string::npos)
+	{
+		std::string tmp = str.substr(i);
+		if (tmp == ".jpg" || tmp == ".png" || tmp == ".pdf")
+			return (true);
+	}
+	return (false);
+}
+bool verif_username(std::string &str, const std::string& username)
+{
+	size_t i;
+
+	i = str.find_first_of('_');
+	if (i != std::string::npos)
+	{
+		size_t j = username.find_first_of('=');
+		if (j != std::string::npos)
+		{
+			std::string verif = str.substr(0 , i);
+			std::string user = username.substr(j + 1);
+			std::cout << verif << " / " << user << std::endl;
+			if (verif == user)
+				return (true);
+		}
+	}
+	return (false);
+}
+void Connection::delete_function()
+{
+	if (is_cgi_d(_uri))
+	{
+        start_cgi();
+	}
+	else
+	{
+		std::string stock;
+		if (is_uploads(_uri, stock))
+		{
+			_path_upload = stock;
+			if (verif_path_traversal(_path_upload) && verif_extension(_path_upload))
+			{
+				if (verif_username(_path_upload, _env.get_Cookie_string()))
+				{
+					std::cout << "200 OK" << std::endl;
+				}
+				return;
+			}
+			else
+			{
+				_response.setStatus(403);
+				_response.setBody("Forbidden");
+				_write_buf = _response.build();
+				return;
+			}
+		}
+		else
+		{
+			_response.setStatus(404);
+			_response.setBody("Not Found");
+			_write_buf = _response.build();
+			return ;
+		}
+	}
+
+}
 void	Connection::pollIn(void)
 {
 	recvData();
@@ -163,6 +276,17 @@ void	Connection::pollIn(void)
 		get();
 	else if (_method == "POST")
 		post();
+	else if (_method == "DELETE")
+	{
+		delete_function();
+	}
+	else
+	{
+		_response.setStatus(405);
+		_response. addHeader("Allow", "GET, POST, DELETE");
+        _response.setBody("Method not supported");
+        _write_buf = _response.build();
+	}
 	_expected_length = 0;
 	_fd->events = POLLOUT;
 }
