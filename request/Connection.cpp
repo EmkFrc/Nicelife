@@ -6,7 +6,7 @@
 /*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/06 21:47:53 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/22 19:31:04 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,9 +110,11 @@ void Connection::pollOut(void)
 }
 bool	is_cgi_d(const std::string &str)
 {
-	size_t	i;
-
-	i = str.find_last_of('.');
+    if (str.find("/uploads/") == 0)
+	{
+        return false;
+	}
+	size_t	i = str.find_last_of('.');
 	if (i != std::string::npos)
 	{
 		std::string tmp = str.substr(i);
@@ -165,30 +167,44 @@ bool verif_extension(const std::string& str)
 	}
 	return (false);
 }
-bool verif_username(std::string &str, const std::string& username)
+std::string extract_username_from_cookie(const std::string& cookie_string)
 {
-	size_t i;
+    size_t pos = cookie_string.find("username=");
+    if (pos == std::string::npos)
+        return "";
+    size_t start = pos + 9;
+    size_t end = cookie_string.find(';', start);
+    if (end == std::string::npos)
+        end = cookie_string.length();
+    std::string username = cookie_string.substr(start, end - start);
 
-	i = str.find_first_of('_');
-	if (i != std::string::npos)
-	{
-		size_t j = username.find_first_of('=');
-		if (j != std::string::npos)
-		{
-			std::string verif = str.substr(0 , i);
-			std::string user = username.substr(j + 1);
-			std::cout << verif << " / " << user << std::endl;
-			if (verif == user)
-				return (true);
-		}
-	}
-	return (false);
+    size_t first = username.find_first_not_of("\t");
+    if (first == std::string::npos)
+        return "";
+    size_t last = username.find_last_not_of(" \t");
+
+    return username.substr(first, last - first + 1);
+}
+
+bool verif_username(const std::string& filename, const std::string& cookie_string)
+{
+    std::string username = extract_username_from_cookie(cookie_string);
+
+    if (username.empty())
+    {
+        return false;
+    }
+    std::string prefix = username + "_";
+    bool result = (filename.find(prefix) == 0);
+
+    return result;
 }
 void Connection::delete_function()
 {
 	if (is_cgi_d(_uri))
 	{
         start_cgi();
+		return;
 	}
 	else
 	{
@@ -196,20 +212,24 @@ void Connection::delete_function()
 		if (is_uploads(_uri, stock))
 		{
 			_path_upload = stock;
-			if (verif_path_traversal(_path_upload) && verif_extension(_path_upload))
+			if (verif_path_traversal(_path_upload) && verif_extension(_path_upload) && verif_username(_path_upload, _env.get_Cookie_string()))
 			{
-				if (verif_username(_path_upload, _env.get_Cookie_string()))
-				{
-					std::cout << "200 OK" << std::endl;
-				}
-				return;
+				_response.setStatus(501);
+            	_response.addHeader("Content-Type", "application/json");
+                _response.setBody(
+                "{"
+                "\"error\": \"Not Implemented\","
+                "\"message\": \"Direct file deletion requires unlink() system call\","
+                "\"alternative\": \"Use /delete-file-cgi. py endpoint instead\""
+                "}"
+                );
+                _write_buf = _response.build();
 			}
 			else
 			{
 				_response.setStatus(403);
 				_response.setBody("Forbidden");
 				_write_buf = _response.build();
-				return;
 			}
 		}
 		else
@@ -217,10 +237,9 @@ void Connection::delete_function()
 			_response.setStatus(404);
 			_response.setBody("Not Found");
 			_write_buf = _response.build();
-			return ;
 		}
 	}
-
+    sendData();
 }
 void	Connection::pollIn(void)
 {
