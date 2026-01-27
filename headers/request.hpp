@@ -6,7 +6,7 @@
 /*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/06 20:09:29 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/27 15:51:38 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 #include "Response.hpp"
 #include "webserv.hpp"
 #include "CGIExecution.hpp"
-
+#include <sys/stat.h>
 #define BUFFER_SIZE 1024
 
 typedef	struct s_upload
@@ -58,7 +58,7 @@ class	Connection
 	void		start_cgi(void);
 	void		handle_executing_cgi(void);
 
-	void		getFilename(t_upload *data, size_t headersLength);
+	void		getFilename(std::string username, t_upload *data, size_t headersLength);
 	bool		getExec();
 	void		upload(void);
 	void		post(void);
@@ -69,6 +69,7 @@ class	Connection
 	void		pollIn(void);
 	bool		closeRequest(void);
 
+	void sendError(int code, const std::string& message);
 	private:
 
 	struct pollfd	*_fd;
@@ -87,3 +88,5 @@ class	Connection
 	bool			_close;
 };
 
+
+std::string extract_username_from_cookie(const std::string& cookie_string);

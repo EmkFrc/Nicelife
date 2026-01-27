@@ -6,7 +6,7 @@
 /*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/22 19:31:04 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/27 15:53:53 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,25 @@ void Connection::sendData(void)
 		n = send(_fd->fd, _write_buf.c_str() + _write_offset, _write_buf.size() - _write_offset, 0);
 		if (n > 0)
 			_write_offset += n;
-		// else
-		// {
-		// 	//TODO handle error
-		// }
 	}
 	std::cout << std::endl;
+}
+void Connection::sendError(int code, const std::string& message)
+{
+    _response.setStatus(code);
+    _response.addHeader("Content-Type", "application/json");
+
+    std::ostringstream json;
+    json << "{"
+         << "\"error\":\"" << _response.getStatusMessage(code) << "\","
+         << "\"code\":" << code << ","
+         << "\"message\":\"" << message << "\""
+         << "}";
+
+    _response.setBody(json.str());
+    _write_buf = _response.build();
+    sendData();
+	_fd->events = POLLOUT;
 }
 
 void	Connection::recvData(void)
@@ -54,7 +67,7 @@ void	Connection::recvData(void)
 		_read_buf.clear();
 	while (true)
 	{
-		std ::cout << _fd->fd;
+		// std ::cout << _fd->fd;
 		received = recv(_fd->fd, buffer, BUFFER_SIZE, MSG_DONTWAIT);
 
 		if (received > 0)
@@ -68,9 +81,6 @@ void	Connection::recvData(void)
 				_env.extract_method(_read_buf);
 				_env.parse_headers(_read_buf);
 				_env.parse_body(_read_buf);
-				// std::cout << "==============="<<std::endl;
-
-				// std::cout << "==============="<<std::endl;
 				return ;
 			}
 		}
@@ -81,7 +91,7 @@ void	Connection::recvData(void)
 			break;
 		}
 		else
-			break;//TODO peut etre dangereux
+			break;
 	}
 }
 
@@ -104,7 +114,6 @@ void Connection::requestData(void)
 void Connection::pollOut(void)
 {
 	std::string response;
-
 	recvData();
 	_fd->events = POLLIN;
 }
@@ -199,12 +208,18 @@ bool verif_username(const std::string& filename, const std::string& cookie_strin
 
     return result;
 }
+bool	file_exists(const std::string &path)
+{
+	struct stat	buffer;
+
+	return (stat(path.c_str(), &buffer) == 0);
+}
 void Connection::delete_function()
 {
 	if (is_cgi_d(_uri))
 	{
-        start_cgi();
-		return;
+		start_cgi();
+		return ;
 	}
 	else
 	{
@@ -212,18 +227,44 @@ void Connection::delete_function()
 		if (is_uploads(_uri, stock))
 		{
 			_path_upload = stock;
-			if (verif_path_traversal(_path_upload) && verif_extension(_path_upload) && verif_username(_path_upload, _env.get_Cookie_string()))
+			if (verif_path_traversal(_path_upload)
+				&& verif_extension(_path_upload) && verif_username(_path_upload,
+					_env.get_Cookie_string()))
 			{
-				_response.setStatus(501);
-            	_response.addHeader("Content-Type", "application/json");
-                _response.setBody(
-                "{"
-                "\"error\": \"Not Implemented\","
-                "\"message\": \"Direct file deletion requires unlink() system call\","
-                "\"alternative\": \"Use /delete-file-cgi. py endpoint instead\""
-                "}"
-                );
-                _write_buf = _response.build();
+				std::string filepath = "data/" + _path_upload;
+				if (!file_exists(filepath))
+				{
+					std::cout << "File not found (404)" << std::endl;
+					_response.setStatus(404);
+					_response.addHeader("Content-Type", "application/json");
+					_response.setBody("{\"error\": \"File not found\"}");
+					_write_buf = _response.build();
+					return ;
+				}
+				if (std::remove(filepath.c_str()) == 0)
+				{
+					_response.setStatus(200);
+					_response.addHeader("Content-Type", "application/json");
+					_response.setBody("{"
+										"\"status\": \"success\","
+										"\"message\": \"File deleted successfully\","
+										"\"file\": \"" +
+										_path_upload +
+										"\""
+										"}");
+					_write_buf = _response.build();
+				}
+				else
+				{
+					std::cout << "Failed to delete file" << std::endl;
+					_response.setStatus(500);
+					_response.addHeader("Content-Type", "application/json");
+					_response.setBody("{"
+										"\"error\": \"Internal server error\","
+										"\"details\": \"Failed to delete file\""
+										"}");
+					_write_buf = _response.build();
+				}
 			}
 			else
 			{
@@ -239,7 +280,7 @@ void Connection::delete_function()
 			_write_buf = _response.build();
 		}
 	}
-    sendData();
+	sendData();
 }
 void	Connection::pollIn(void)
 {
@@ -301,10 +342,7 @@ void	Connection::pollIn(void)
 	}
 	else
 	{
-		_response.setStatus(405);
-		_response. addHeader("Allow", "GET, POST, DELETE");
-        _response.setBody("Method not supported");
-        _write_buf = _response.build();
+		sendError(405, "Method not supported");
 	}
 	_expected_length = 0;
 	_fd->events = POLLOUT;

@@ -6,7 +6,7 @@
 /*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/11 20:08:27 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/18 23:20:33 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/27 15:55:00 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,7 +157,7 @@ void	Connection::handle_executing_cgi(void)
 			std::cout << "EOF sur le pipe" << std::endl;
 		if (n == -1)
 		{
-			if (errno != EAGAIN && errno != EWOULDBLOCK)//TODO interdit
+			if (errno != EAGAIN && errno != EWOULDBLOCK)
 			{
 				std::cerr << "error : read()" << std::endl;
 				return ;
@@ -187,9 +187,6 @@ void	Connection::handle_executing_cgi(void)
 			}
 			_write_buf.clear();
 			_write_buf = build_cgi_response(_cgi, parsed_headers);
-			// std::cout << "------------------------" << std::endl;
-			// std::cout << _write_buf << std::endl;
-			// std::cout << "------------------------" << std::endl;
 			sendData();
 			close(_cgi->pipe_fd);
 			delete _cgi;

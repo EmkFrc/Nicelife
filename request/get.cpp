@@ -6,7 +6,7 @@
 /*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/19 16:25:33 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/27 00:23:45 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,11 @@ bool	is_cgi(const std::string &str)
 }
 void	Connection::get(void)
 {
+	if (_uri.length() > 2048)
+    {
+        sendError(414, "URI too long");
+        return;
+    }
 	if (is_cgi(_uri))
         start_cgi();
 	else if (_uri == "/")
