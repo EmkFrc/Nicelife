@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/27 00:23:45 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/29 15:59:35 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,8 @@ void	Connection::sendResponse(std::string filename)
 void	Connection::sendIcon(void)
 {
 // 	std::cout << "icon" << std::endl;
-	std::ifstream	icon("website/Imran.ico", std::ios::binary);
+	std::string		filename(_root + "website/Imran.ico");
+	std::ifstream	icon(filename.c_str(), std::ios::binary);
 	std::string		length;
 	std::ostringstream size;
 
@@ -97,13 +98,9 @@ void	Connection::get(void)
 	if (is_cgi(_uri))
         start_cgi();
 	else if (_uri == "/")
-		sendResponse("website/home.html");
+		sendResponse(_root + "website/" + _index);
 	else if (_uri == "/favicon.ico")
 		sendIcon();
-	else if (_uri == "/upload")
-		sendResponse("website/upload.html");
-	else if (_uri == "/nicelife-style.css")
-		sendResponse("website/nicelife-style.css");
 	else
-		send404();
+		sendResponse(_root + "website/" + _uri);
 }

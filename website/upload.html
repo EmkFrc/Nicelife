@@ -107,7 +107,7 @@
       </div>
     </div>
 
-    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" novalidate>
+    <form id="uploadForm" action="/upload.html" method="post" enctype="multipart/form-data" novalidate>
       <!-- CSRF token: le serveur doit en fournir un et le valider à la réception -->
       <input type="hidden" name="csrf_token" value="<!-- INSERT_CSRF_TOKEN_SERVER_SIDE -->">
 
@@ -287,7 +287,12 @@
                   previewArea.appendChild(a);
                 }
               } catch(e) { /* ignore non-json */ }
-            } else {
+            } 
+            else if (xhr.status == 401) {
+              statusMsg.textContent = 'Connection requise pour upload un fichier';
+              statusMsg.classList.add('error');
+            }
+            else {
               statusMsg.textContent = 'Erreur serveur: ' + xhr.status;
               statusMsg.classList.add('error');
             }

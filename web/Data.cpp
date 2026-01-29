@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Data.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/28 16:02:50 by nmartin           #+#    #+#             */
-/*   Updated: 2025/12/18 23:06:29 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/29 15:54:28 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,25 @@ Data::~Data()
 {
 }
 
+void	Data::setServers(std::vector<ConfigServer> servers)
+{
+	_servers = servers;
+	_root = servers[0].getRoot();
+}
+
 void	Data::setAddrinfo(void)
 {
 	int				status;
 	struct addrinfo	hints;
+	std::stringstream ss;
+	ss << _servers[0].getPort();
+	std::string port = ss.str();
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
-	status = getaddrinfo(NULL, PORT, &hints, &this->_addrinfo);
+	status = getaddrinfo(_servers[0].getHost().c_str(), port.c_str(), &hints, &this->_addrinfo);
 	if (status != 0)
 	{
 		std::cerr << "Error: getaddrinfo: " << gai_strerror(status) << std::endl;
@@ -107,6 +116,7 @@ void	Data::clientRequest(int index)
 	if (_connections.find(_fds[index].fd) == _connections.end())
 	{
 		_connections[_fds[index].fd] = Connection(&_fds[index]);
+		_connections[_fds[index].fd].setConf(_servers[0].getRoot(), _servers[0].getIndex());
 		// std::cout << "New connection created for fd " << _fds[index].fd << std::endl;
 	}
 	if (_fds[index].revents & POLLIN)

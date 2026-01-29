@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/27 15:53:53 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/29 15:50:02 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,12 @@ Connection::Connection(struct pollfd *fd) : _fd(fd), _write_offset(0), _expected
 
 Connection::~Connection()
 {
+}
+
+void	Connection::setConf(std::string root, std::string index)
+{
+	_root = root;
+	_index = index;
 }
 
 void Connection::sendData(void)

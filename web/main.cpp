@@ -52,8 +52,27 @@ int	main(int ac, char **av)
 		std::cerr << "Error: Bad arguments!\nUsage: ./webserv [configuration file]" << std::endl;
 		exit(2);
 	}
-	(void)av;
-	//parsing conf file//JOUDY au charbon
+	try {
+		// 1. Tokenization
+		std::vector<std::string> tokens = ConfigTokenizer::tokenize(av[1]);
+
+		// 2. Parsing
+		ConfigParser parser(tokens);
+		parser.parse();
+		std::vector<ConfigServer> servers = parser.getServers();
+
+		// 3. Vérification du résultat
+		std::cout << "Nombre de serveurs configurés : " << servers.size() << std::endl;
+		for (size_t i = 0; i < servers.size(); ++i) {
+			std::cout << "Serveur " << i << " sur le port " << servers[i].getPort() << std::endl;
+			std::cout << "  - Root: " << servers[i].getRoot() << std::endl;
+			std::cout << "  - Nombre de locations: " << servers[i].getLocations().size() << std::endl;
+		}
+        data.setServers(servers);
+	} catch (const std::exception& e) {
+		std::cerr << "Configuration error : " << e.what() << std::endl;
+		return 1;
+	}
 	data.setAddrinfo();
 	data.addListener();
 	data.pollLoop();

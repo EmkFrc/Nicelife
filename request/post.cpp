@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   post.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 13:52:30 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/27 00:34:22 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/29 16:02:03 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ void	Connection::getFilename(std::string username, t_upload *data, size_t header
 	filename = line.substr(index, end - index);
 	filename = "data/" + username + "_" + filename;
 	filename.insert(filename.find("."), getTimestamp());
-	data->filename = filename;
+	data->filename = _root + filename;
 }
 
 bool	Connection::getExec(void)
@@ -177,7 +177,7 @@ void	Connection::post(void)
         sendError(400, "Malformed Content-Length header");
         return;
     }
-	if (_uri == "/upload")
+	if (_uri == "/upload.html")
 	{
 		upload();
 		sendData();

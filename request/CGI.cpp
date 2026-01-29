@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/11 20:08:27 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/27 15:55:00 by efranco          ###   ########.fr       */
+/*   Updated: 2026/01/29 16:01:04 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ void Connection::start_cgi(void)
 {
     size_t derniere_barre = _uri.find_last_of('/');
     std::string nom_fichier = _uri.substr(derniere_barre + 1);
-    std::string chemin_reel = "./" + nom_fichier;
+    std::string chemin_reel = _root + nom_fichier;
 
     pid_t   pid;
     int     pipein[2], pipeout[2];
