@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/29 15:50:02 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/14 16:42:27 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,11 @@ Connection::~Connection()
 {
 }
 
-void	Connection::setConf(std::string root, std::string index)
+void	Connection::setConf(std::string root, std::string index, std::map<int, std::string> error_pages)
 {
 	_root = root;
 	_index = index;
+	_error_pages = error_pages;
 }
 
 void Connection::sendData(void)
@@ -48,6 +49,11 @@ void Connection::sendData(void)
 void Connection::sendError(int code, const std::string& message)
 {
     _response.setStatus(code);
+	if (_error_pages.find(code) != _error_pages.end())
+	{
+		sendResponse(_root + _error_pages[code], true);
+		return ;
+	}
     _response.addHeader("Content-Type", "application/json");
 
     std::ostringstream json;

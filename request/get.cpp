@@ -6,17 +6,20 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/29 15:59:35 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/14 18:38:12 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "request.hpp"
 
-
-
-void	Connection::send404(void)
+void	Connection::send404(bool status)
 {
 	_response.setStatus(404);
+	if (!status && _error_pages.find(404) != _error_pages.end())
+	{
+		sendResponse(_root + _error_pages[404], true);
+		return ;
+	}
 	_response.addHeader("Content-Type", "text/html");
 	_response.setBody("<h1>404 - File Not Found</h1>");
 	_write_buf.clear();
@@ -25,7 +28,7 @@ void	Connection::send404(void)
 	_fd->events = POLLOUT;
 }
 
-void	Connection::sendResponse(std::string filename)
+void	Connection::sendResponse(std::string filename, bool status)
 {
 	// std::cout << "reponse" << std::endl;
 	std::ifstream	file(filename.c_str(), std::ios::binary);
@@ -33,13 +36,14 @@ void	Connection::sendResponse(std::string filename)
 	std::ostringstream size;
 
 	if (!file)
-		return (send404());
+		return (send404(status));
 	std::string content((std::istreambuf_iterator<char>(file)),
                     		std::istreambuf_iterator<char>());
 	file.close();
 	size << content.size();
 	length = size.str();
-	_response.setStatus(200);
+	if (!status)
+		_response.setStatus(200);
 	_response.addHeader("Content-Type", _response.get_content_type(filename));
 	_response.setBody(content);
 	// _write_buf += "Content-Length" + length + "\r\n";//TODO faire content length
@@ -60,7 +64,7 @@ void	Connection::sendIcon(void)
 	std::ostringstream size;
 
 	if (!icon)
-		return (send404());
+		return (send404(false));
 	std::string content((std::istreambuf_iterator<char>(icon)),
                     		std::istreambuf_iterator<char>());
 	icon.close();
@@ -98,9 +102,9 @@ void	Connection::get(void)
 	if (is_cgi(_uri))
         start_cgi();
 	else if (_uri == "/")
-		sendResponse(_root + "website/" + _index);
+		sendResponse(_root + "website/" + _index, false);
 	else if (_uri == "/favicon.ico")
 		sendIcon();
 	else
-		sendResponse(_root + "website/" + _uri);
+		sendResponse(_root + "website/" + _uri, false);
 }

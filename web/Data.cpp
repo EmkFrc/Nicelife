@@ -6,14 +6,12 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/28 16:02:50 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/29 15:54:28 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/14 16:37:06 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include "request.hpp"
-
-#define PORT "6969"
 
 Data::Data() : _addrinfo(NULL), _fdsNbr(0)
 {
@@ -116,7 +114,7 @@ void	Data::clientRequest(int index)
 	if (_connections.find(_fds[index].fd) == _connections.end())
 	{
 		_connections[_fds[index].fd] = Connection(&_fds[index]);
-		_connections[_fds[index].fd].setConf(_servers[0].getRoot(), _servers[0].getIndex());
+		_connections[_fds[index].fd].setConf(_servers[0].getRoot(), _servers[0].getIndex(), _servers[0].getErrorPages());
 		// std::cout << "New connection created for fd " << _fds[index].fd << std::endl;
 	}
 	if (_fds[index].revents & POLLIN)

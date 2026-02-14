@@ -18,6 +18,7 @@ class	ConfigParser {
 		void checkSemicolon();
 		void checkBrace();
 		bool isNumber(const std::string& s);
+		unsigned long	parseSize(std::string s);
 
 	public:
 		// Recoit les tokens

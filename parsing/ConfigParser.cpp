@@ -35,6 +35,27 @@ bool ConfigParser::isNumber(const std::string& s) {
 	return true;
 }
 
+unsigned long ConfigParser::parseSize(std::string s) {
+	if (s.empty())
+		return 0;
+	char unit = s[s.length() - 1];
+	unsigned long multiplier = 1;
+
+	if (unit == 'K')
+		multiplier = 1024;
+	else if (unit == 'M')
+		multiplier = 1024 * 1024;
+	else if (unit == 'G')
+		multiplier = 1024 * 1024 * 1024;
+
+	if (multiplier > 1)
+		s.erase(s.length() - 1);
+	if (!isNumber(s))
+		throw std::runtime_error("Invalid size format: " + s);
+
+	return static_cast<unsigned long>(std::atol(s.c_str())) * multiplier;
+}
+
 void ConfigParser::parse() {
 	while (_pos < _tokens.size()) {
 		if (_tokens[_pos] == "server") {
@@ -42,7 +63,6 @@ void ConfigParser::parse() {
 		} else {
 			throw std::runtime_error("Configuration error: unknown or misplaced directive '" + _tokens[_pos] + "'");
 		}
-			_pos++;
 	}
 }
 
@@ -68,13 +88,56 @@ ConfigServer ConfigParser::parseServer() {
 		}
 		else if (_tokens[_pos] == "server_name") {
 			_pos++;
-			newServer.addServerName(_tokens[_pos]);
-			_pos++;
+			if (_pos >= _tokens.size() || _tokens[_pos] == ";")
+				throw std::runtime_error("Configuration error: server name needs at least one argument");
+			while (_pos < _tokens.size() && _tokens[_pos] != ";") {
+				newServer.addServerName(_tokens[_pos]);
+				_pos++;
+			}
 			checkSemicolon();
 		}
 		else if (_tokens[_pos] == "root") {
 			_pos++;
 			newServer.setRoot(_tokens[_pos]);
+			_pos++;
+			checkSemicolon();
+		}
+		else if (_tokens[_pos] == "client_max_body_size") {
+			_pos++;
+			if (_tokens[_pos][0] == '-') {
+				throw std::runtime_error("Configuration error: client_max_body_size cannot be negative");
+			}
+			newServer.setClientMaxBodySize(parseSize(_tokens[_pos]));
+			_pos++;
+			checkSemicolon();
+		}
+		else if (_tokens[_pos] == "error_page") {
+			_pos++;
+			std::vector<int> codes;
+	
+			while (_pos < _tokens.size() && isNumber(_tokens[_pos])) {
+				codes.push_back(std::atoi(_tokens[_pos++].c_str()));
+			}
+			if (codes.empty()) {
+				throw std::runtime_error("Configuration error: 'error_page' directive requires at least one status code");
+			}
+			if (_pos >= _tokens.size() || _tokens[_pos] == ";")
+				throw std::runtime_error("Configuration error: 'error_page' directive requires a path after the codes");
+			std::string errorPath = _tokens[_pos++];
+			for (size_t i = 0; i < codes.size(); ++i) {
+				newServer.addErrorPage(codes[i], errorPath);
+			}
+			checkSemicolon();
+		}
+		else if (_tokens[_pos] == "index") {
+			_pos++;
+			newServer.setIndex(_tokens[_pos]);
+			_pos++;
+			checkSemicolon();
+		}
+		else if (_tokens[_pos] == "autoindex") {
+			_pos++;
+			newServer.setAutoIndex(_tokens[_pos] == "on");
 			_pos++;
 			checkSemicolon();
 		}
@@ -88,6 +151,7 @@ ConfigServer ConfigParser::parseServer() {
 
 	if (_pos >= _tokens.size() || _tokens[_pos] != "}")
 		throw std::runtime_error("Configuration error: unexpected end of file (missing closing brace '}' for server block)");
+	_pos++;
 	return newServer;
 }
 
@@ -109,18 +173,55 @@ void ConfigParser::parseLocation(ConfigServer& server) {
 			newLoc.root = _tokens[_pos++];
 			checkSemicolon();
 		}
+		else if (_tokens[_pos] == "index") {
+			_pos++;
+			newLoc.index =_tokens[_pos++];
+			checkSemicolon();
+		}
 		else if (_tokens[_pos] == "autoindex") {
 			_pos++;
 			newLoc.autoindex = (_tokens[_pos++] == "on");
 			checkSemicolon();
 		}
+		else if (_tokens[_pos] == "allowed_methods") {
+			_pos++;
+			newLoc.allowed_methods.clear();
+            while (_tokens[_pos] != ";")
+                newLoc.allowed_methods.push_back(_tokens[_pos++]);
+            checkSemicolon();
+        }
+        else if (_tokens[_pos] == "return") {
+			_pos++;
+            newLoc.return_code = std::atoi(_tokens[_pos++].c_str());
+            newLoc.return_url = _tokens[_pos++];
+            checkSemicolon();
+        }
+        else if (_tokens[_pos] == "upload_enable") {
+			_pos++;
+            newLoc.upload_enable = (_tokens[_pos++] == "on");
+            checkSemicolon();
+        }
+        else if (_tokens[_pos] == "upload_store") {
+			_pos++;
+            newLoc.upload_store = _tokens[_pos++];
+            checkSemicolon();
+        }
+        else if (_tokens[_pos] == "cgi_extension") {
+			_pos++;
+            if (_pos + 1 >= _tokens.size())
+				throw std::runtime_error("Configuration error: 'cgi_extension' directive requires an extension and a path");
+			std::string ext = _tokens[_pos++];
+			std::string bin = _tokens[_pos++];
+            newLoc.cgi[ext] = bin;
+            checkSemicolon();
+        }
 		else {
 			throw std::runtime_error("Configuration error: unknown directive '" + _tokens[_pos] + "' in location block");
-			//_pos++;
 		}
 	}
 		
 	if (_pos >= _tokens.size())
 		throw std::runtime_error("Configuration error: unexpected end of file (missing closing brace '}' for location block)");
+	_pos++;
 	server.addLocation(newLoc);
 }

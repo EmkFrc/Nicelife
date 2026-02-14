@@ -10,23 +10,28 @@ class	ConfigServer {
 		std::string					_host;
 		std::string					_root;
 		std::string					_index;
-		unsigned int				_client_max_body_size;
+		unsigned long				_client_max_body_size;
 		std::map<int, std::string>	_error_pages;
 		std::vector<Location>		_locations;
+		bool						_autoindex;
 
 	public:
 		ConfigServer() :
 			_port(8080),
 			_host("127.0.0.1"),
 			_root("/var/www/html"),
-			_index("home.html"),
-			_client_max_body_size(1000000){}
+			_index("index.html"),
+			_client_max_body_size(1000000),
+			_autoindex(false) {}
 
 		// Setters
 		void setPort(int port) { _port = port; }
 		void setHost(const std::string& host) { _host = host; }
 		void setRoot(const std::string& root) { _root = root; }
-		void setMaxBodySize(unsigned long size) { _client_max_body_size = size; }
+		void setClientMaxBodySize(unsigned long size) { _client_max_body_size = size; }
+		void setIndex(const std::string& index) { _index = index; }
+		void setAutoIndex(bool value) { _autoindex = value; }
+
 		void addServerName(const std::string& name) { _server_names.push_back(name); }
 		void addErrorPage(int code, const std::string& path) { _error_pages[code] = path; }
 		void addLocation(const Location& loc) { _locations.push_back(loc); }
@@ -36,6 +41,10 @@ class	ConfigServer {
 		const std::string& getHost() const { return _host; }
 		const std::string& getRoot() const { return _root; }
 		const std::string& getIndex() const { return _index; }
+		unsigned int getClientMaxBodySize() const { return _client_max_body_size; }
+		bool getAutoIndex() const { return _autoindex; }
+		const std::vector<std::string>& getServerNames() const { return _server_names; }
+		const std::map<int, std::string>& getErrorPages() const { return _error_pages; }
 		const std::vector<Location>& getLocations() const { return _locations; }
 };
 
