@@ -13,6 +13,8 @@ class	ConfigServer {
 		unsigned long				_client_max_body_size;
 		std::map<int, std::string>	_error_pages;
 		std::vector<Location>		_locations;
+		bool						_upload_unable;
+		std::string					_upload_root;
 		bool						_autoindex;
 
 	public:
@@ -22,6 +24,8 @@ class	ConfigServer {
 			_root("/var/www/html"),
 			_index("index.html"),
 			_client_max_body_size(1000000),
+			_upload_unable(true),
+			_upload_root("data"),
 			_autoindex(false) {}
 
 		// Setters
@@ -45,6 +49,8 @@ class	ConfigServer {
 		bool getAutoIndex() const { return _autoindex; }
 		const std::vector<std::string>& getServerNames() const { return _server_names; }
 		const std::map<int, std::string>& getErrorPages() const { return _error_pages; }
+		bool getUploadUnable() const { return _upload_unable; }
+		const std::string& getUploadRoot() const { return _upload_root; }
 		const std::vector<Location>& getLocations() const { return _locations; }
 };
 

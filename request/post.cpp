@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 13:52:30 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/14 16:51:07 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/15 18:20:04 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ void	Connection::getFilename(std::string username, t_upload *data, size_t header
     if (end == std::string::npos)
 		return ;
 	filename = line.substr(index, end - index);
-	filename = "data/" + username + "_" + filename;
+	filename = _upload_root + "/" + username + "_" + filename;
 	filename.insert(filename.find("."), getTimestamp());
 	data->filename = _root + filename;
 }
@@ -54,6 +54,30 @@ void	Connection::getFilename(std::string username, t_upload *data, size_t header
 bool	Connection::getExec(void)
 {
 	return (_executing);
+}
+
+bool createDirectories(const std::string &filepath)
+{
+	std::string path = filepath.substr(0, filepath.find_last_of('/'));
+	if (path.empty())
+		return true;
+	size_t pos = 0;
+	if (path[0] == '/')
+		pos = 1;
+	while ((pos = path.find('/', pos)) != std::string::npos)
+	{
+		std::string subdir = path.substr(0, pos);
+		mkdir(subdir.c_str(), 0755);
+		struct stat st;
+		if (stat(subdir.c_str(), &st) != 0 || !S_ISDIR(st.st_mode))
+			return false;
+		pos++;
+	}
+	mkdir(path.c_str(), 0755);
+	struct stat st;
+	if (stat(path.c_str(), &st) != 0 || !S_ISDIR(st.st_mode))
+		return false;
+	return true;
 }
 
 void	Connection::upload(void)
@@ -92,7 +116,11 @@ void	Connection::upload(void)
         sendError(400, "Invalid or missing filename");
         return;
     }
-
+	if (!createDirectories(data.filename))
+    {
+        sendError(500, "Failed to create upload directory");
+        return;
+    }
 	// Début du fichier = après le 2ème \r\n\r\n
 	start = end + 4;
 
@@ -179,8 +207,13 @@ void	Connection::post(void)
     }
 	if (_uri == "/upload.html")
 	{
-		upload();
-		sendData();
+		if (!_upload_unable)
+			sendError(405, "Upload disbabled in server's configuration");
+		else
+		{
+			upload();
+			sendData();
+		}
 		return;
 	}
 	else

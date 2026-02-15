@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>413 — Fichier trop volumineux | NiceLife 🌳</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            overflow: hidden;
+            line-height: 1.6;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #000000 100%);
+            z-index: 0;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #2DD881;
+            border-radius: 50%;
+            opacity: 0;
+            animation: float-up 18s infinite ease-in-out;
+            box-shadow: 0 0 10px #2DD881;
+        }
+
+        .particle:nth-child(1) { left: 15%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 35%; animation-delay: 3s; }
+        .particle:nth-child(3) { left: 55%; animation-delay: 6s; }
+        .particle:nth-child(4) { left: 75%; animation-delay: 9s; }
+        .particle:nth-child(5) { left: 25%; animation-delay: 2s; }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(0);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(-100vh) translateX(-50px) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        .glow {
+            position: fixed;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+            animation: pulse 10s ease-in-out infinite;
+        }
+
+        .glow-1 {
+            background: radial-gradient(circle, #2DD881 0%, transparent 70%);
+            top: -400px;
+            right: -400px;
+        }
+
+        .glow-2 {
+            background: radial-gradient(circle, #5FE9A0 0%, transparent 70%);
+            bottom: -400px;
+            left: -400px;
+            animation-delay: 5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.15;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 0.25;
+            }
+        }
+
+        .error-container {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            z-index: 10;
+        }
+
+        .error-code {
+            font-size: clamp(8rem, 20vw, 15rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #2DD881 0%, #5FE9A0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 2rem;
+        }
+
+        .error-icon {
+            font-size: 5rem;
+            filter: drop-shadow(0 0 20px #2DD881);
+            animation: scale-pulse 2s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes scale-pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .error-title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .error-subtitle {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            color: #B0B0B0;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .btn-home {
+            background: #2DD881;
+            color: #000000;
+            padding: 1.2rem 3rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .btn-home:hover {
+            background: #5FE9A0;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(45, 216, 129, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 8rem;
+            }
+            .error-icon {
+                font-size: 3rem;
+            }
+            .btn-home {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="error-container">
+        <div class="error-icon">📦</div>
+        <div class="error-code">413</div>
+        <h1 class="error-title">Requête trop volumineuse</h1>
+        <p class="error-subtitle">
+            La requête que vous tentez d'envoyer dépasse la taille maximale autorisée par le serveur.
+        </p>
+        <a href="/" class="btn-home">
+            Retour à l'accueil 🌳
+        </a>
+    </div>
+</body>
+</html>

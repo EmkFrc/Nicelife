@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/14 16:42:27 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/15 17:50:42 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,14 @@ Connection::~Connection()
 {
 }
 
-void	Connection::setConf(std::string root, std::string index, std::map<int, std::string> error_pages)
+void	Connection::setConf(const ConfigServer &server)
 {
-	_root = root;
-	_index = index;
-	_error_pages = error_pages;
+	_root = server.getRoot();
+	_index = server.getIndex();
+	_error_pages = server.getErrorPages();
+	_client_max_body_size = server.getClientMaxBodySize();
+	_upload_unable = server.getUploadUnable();//TODO lier au conf file
+	_upload_root = server.getUploadRoot();
 }
 
 void Connection::sendData(void)
@@ -294,6 +297,7 @@ void Connection::delete_function()
 	}
 	sendData();
 }
+
 void	Connection::pollIn(void)
 {
 	recvData();
@@ -343,6 +347,13 @@ void	Connection::pollIn(void)
 		return;
 	}
 	std::cout << _read_buf << std::endl;
+	if (_read_buf.length() > _client_max_body_size)
+	{
+		sendErrorPage(413, "Request Entity Too Large");
+		_expected_length = 0;
+		_fd->events = POLLOUT;
+		return ;
+	}
 	requestData();
 	if (_method == "GET")
 		get();
@@ -354,7 +365,7 @@ void	Connection::pollIn(void)
 	}
 	else
 	{
-		sendError(405, "Method not supported");
+		sendErrorPage(405, "Method not supported");
 	}
 	_expected_length = 0;
 	_fd->events = POLLOUT;

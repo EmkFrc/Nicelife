@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/14 18:38:12 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/15 17:35:43 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,25 @@ void	Connection::send404(bool status)
 	}
 	_response.addHeader("Content-Type", "text/html");
 	_response.setBody("<h1>404 - File Not Found</h1>");
+	_write_buf.clear();
+	_write_buf = _response.build();
+    sendData();
+	_fd->events = POLLOUT;
+}
+
+void	Connection::sendErrorPage(int status, std::string errorMsg)
+{
+	_response.setStatus(status);
+	if (_error_pages.find(status) != _error_pages.end())
+	{
+		sendResponse(_root + _error_pages[status], true);
+		return ;
+	}
+	_response.addHeader("Content-Type", "text/html");
+	std::ostringstream oss;
+	oss << "<h1>" << status << " - " << errorMsg << "</h1>";
+	std::string message = oss.str();
+	_response.setBody(message);
 	_write_buf.clear();
 	_write_buf = _response.build();
     sendData();
