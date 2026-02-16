@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/16 15:36:55 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/16 19:05:53 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,25 +74,25 @@ class	Connection
 	void sendError(int code, const std::string& message);
 	private:
 
-	struct pollfd				*_fd;
-	std::string 				_read_buf;
-	std::string					_write_buf;
-	std::string					_path_upload;
-	size_t						_write_offset;
-	size_t						_expected_length;
-	std::string 				_method;
-	std::string 				_uri;
-	std::string 				_version;
-	Env							_env;
-	Response					_response;
-	std::string					_root;
-	std::string					_index;
-	std::map<int, std::string>	_error_pages;
-	unsigned int				_client_max_body_size;
-	std::vector<Location>		_location;
-	CGIExecution* 				_cgi;
-	bool						_executing;
-	bool						_close;
+	struct pollfd						*_fd;
+	std::string 						_read_buf;
+	std::string							_write_buf;
+	std::string							_path_upload;
+	size_t								_write_offset;
+	size_t								_expected_length;
+	std::string 						_method;
+	std::string 						_uri;
+	std::string 						_version;
+	Env									_env;
+	Response							_response;
+	std::string							_root;
+	std::string							_index;
+	std::map<int, std::string>			_error_pages;
+	unsigned int						_client_max_body_size;
+	std::map<std::string, Location>	_location;
+	CGIExecution* 						_cgi;
+	bool								_executing;
+	bool								_close;
 };
 
 

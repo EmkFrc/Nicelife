@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 13:52:30 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/15 18:20:04 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/16 19:50:14 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,15 @@ void	Connection::getFilename(std::string username, t_upload *data, size_t header
     if (end == std::string::npos)
 		return ;
 	filename = line.substr(index, end - index);
-	filename = _upload_root + "/" + username + "_" + filename;
+	std::string upload_root;
+	if (_location.find("/upload.html") != _location.end())
+	{
+		upload_root = _location["upload.html"].upload_store;
+		std::cout << "444444444444444444444444444" << _location["upload.html"].upload_store << std::endl;
+	}
+	else
+		upload_root = "data";
+	filename = upload_root + "/" + username + "_" + filename;
 	filename.insert(filename.find("."), getTimestamp());
 	data->filename = _root + filename;
 }
@@ -207,7 +215,7 @@ void	Connection::post(void)
     }
 	if (_uri == "/upload.html")
 	{
-		if (!_upload_unable)
+		if (_location.find("/upload.html") != _location.end() && !_location["/upload.html"].upload_enable)
 			sendError(405, "Upload disbabled in server's configuration");
 		else
 		{

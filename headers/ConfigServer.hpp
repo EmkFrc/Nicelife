@@ -5,17 +5,15 @@
 
 class	ConfigServer {
 	private:
-		int							_port;
-		std::vector<std::string>	_server_names;
-		std::string					_host;
-		std::string					_root;
-		std::string					_index;
-		unsigned long				_client_max_body_size;
-		std::map<int, std::string>	_error_pages;
-		std::vector<Location>		_locations;
-		bool						_upload_unable;
-		std::string					_upload_root;
-		bool						_autoindex;
+		int								_port;
+		std::vector<std::string>		_server_names;
+		std::string						_host;
+		std::string						_root;
+		std::string						_index;
+		unsigned long					_client_max_body_size;
+		std::map<int, std::string>		_error_pages;
+		std::map<std::string, Location>	_locations;
+		bool							_autoindex;
 
 	public:
 		ConfigServer() :
@@ -36,7 +34,7 @@ class	ConfigServer {
 
 		void addServerName(const std::string& name) { _server_names.push_back(name); }
 		void addErrorPage(int code, const std::string& path) { _error_pages[code] = path; }
-		void addLocation(const Location& loc) { _locations.push_back(loc); }
+		void addLocation(const Location& loc) { _locations[loc.path] = loc; }
 
 		// Getters
 		int getPort() const { return _port; }
@@ -47,7 +45,7 @@ class	ConfigServer {
 		bool getAutoIndex() const { return _autoindex; }
 		const std::vector<std::string>& getServerNames() const { return _server_names; }
 		const std::map<int, std::string>& getErrorPages() const { return _error_pages; }
-		const std::vector<Location>& getLocations() const { return _locations; }
+		const std::map<std::string, Location>& getLocations() const { return _locations; }
 };
 
 #endif
