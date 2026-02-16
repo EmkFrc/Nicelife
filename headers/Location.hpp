@@ -27,7 +27,7 @@ struct	Location {
 		return_code(0),
 		return_url(""),
 		cgi(),
-		upload_store(""),
+		upload_store("data"),
 		upload_enable(false)
 		{
 			allowed_methods.push_back("GET");

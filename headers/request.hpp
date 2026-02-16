@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/15 17:50:36 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/16 15:36:55 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,8 +89,7 @@ class	Connection
 	std::string					_index;
 	std::map<int, std::string>	_error_pages;
 	unsigned int				_client_max_body_size;
-	bool						_upload_unable;
-	std::string					_upload_root;
+	std::vector<Location>		_location;
 	CGIExecution* 				_cgi;
 	bool						_executing;
 	bool						_close;
