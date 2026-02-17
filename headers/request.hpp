@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/17 15:02:26 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/17 18:22:05 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@
 #include "webserv.hpp"
 #include "CGIExecution.hpp"
 #include <sys/stat.h>
+#include <dirent.h>
+#include <algorithm>
 #define BUFFER_SIZE 1024
 
 typedef	struct s_upload
@@ -52,6 +54,8 @@ class	Connection
 
 	void		send404(bool status);
 	void		sendErrorPage(int status, std::string errorMsg);
+	void		directoryListing(std::string path);
+	void		autoindex(void);
 	void		sendResponse(std::string filename, bool status);
 	void		sendIcon(void);
 	void		get(void);
@@ -88,6 +92,7 @@ class	Connection
 	std::string							_root;
 	std::string							_default_root;
 	std::string							_index;
+	std::string							_default_index;
 	std::map<int, std::string>			_error_pages;
 	unsigned int						_client_max_body_size;
 	std::map<std::string, Location>		_location;
