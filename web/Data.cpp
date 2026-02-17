@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/28 16:02:50 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/15 17:34:35 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/17 14:38:34 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ Data::~Data()
 void	Data::setServers(std::vector<ConfigServer> servers)
 {
 	_servers = servers;
-	_root = servers[0].getRoot();
 }
 
 void	Data::setAddrinfo(void)

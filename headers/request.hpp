@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/16 19:05:53 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/17 15:02:26 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,10 +86,11 @@ class	Connection
 	Env									_env;
 	Response							_response;
 	std::string							_root;
+	std::string							_default_root;
 	std::string							_index;
 	std::map<int, std::string>			_error_pages;
 	unsigned int						_client_max_body_size;
-	std::map<std::string, Location>	_location;
+	std::map<std::string, Location>		_location;
 	CGIExecution* 						_cgi;
 	bool								_executing;
 	bool								_close;

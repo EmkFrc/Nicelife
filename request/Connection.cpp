@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/16 19:40:26 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/17 15:13:16 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ Connection::~Connection()
 
 void	Connection::setConf(const ConfigServer &server)
 {
-	_root = server.getRoot();
+	_default_root = server.getRoot();
 	_index = server.getIndex();
 	_error_pages = server.getErrorPages();
 	_client_max_body_size = server.getClientMaxBodySize();
@@ -53,7 +53,7 @@ void Connection::sendError(int code, const std::string& message)
     _response.setStatus(code);
 	if (_error_pages.find(code) != _error_pages.end())
 	{
-		sendResponse(_root + _error_pages[code], true);
+		sendResponse(_default_root + _error_pages[code], true);
 		return ;
 	}
     _response.addHeader("Content-Type", "application/json");

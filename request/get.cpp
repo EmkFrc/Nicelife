@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/15 17:35:43 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/17 15:21:05 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void	Connection::sendErrorPage(int status, std::string errorMsg)
 	_response.setStatus(status);
 	if (_error_pages.find(status) != _error_pages.end())
 	{
-		sendResponse(_root + _error_pages[status], true);
+		sendResponse(_default_root + _error_pages[status], true);
 		return ;
 	}
 	_response.addHeader("Content-Type", "text/html");
@@ -54,6 +54,7 @@ void	Connection::sendResponse(std::string filename, bool status)
 	std::string		length;
 	std::ostringstream size;
 
+	std::cout <<filename <<"888888888888" << std::endl;
 	if (!file)
 		return (send404(status));
 	std::string content((std::istreambuf_iterator<char>(file)),
@@ -77,7 +78,7 @@ void	Connection::sendResponse(std::string filename, bool status)
 void	Connection::sendIcon(void)
 {
 // 	std::cout << "icon" << std::endl;
-	std::string		filename(_root + "website/Imran.ico");
+	std::string		filename(_root + "Imran.ico");
 	std::ifstream	icon(filename.c_str(), std::ios::binary);
 	std::string		length;
 	std::ostringstream size;
@@ -118,12 +119,16 @@ void	Connection::get(void)
         sendError(414, "URI too long");
         return;
     }
+	if (_location.find(_uri) != _location.end() && !_location[_uri].root.empty())
+		_root = _location[_uri].root;
+	else
+		_root = _default_root;
 	if (is_cgi(_uri))
         start_cgi();
 	else if (_uri == "/")
-		sendResponse(_root + "website/" + _index, false);
+		sendResponse(_root + _index, false);
 	else if (_uri == "/favicon.ico")
 		sendIcon();
 	else
-		sendResponse(_root + "website/" + _uri, false);
+		sendResponse(_root + _uri, false);
 }
