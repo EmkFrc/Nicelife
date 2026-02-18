@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/17 17:03:49 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/17 19:20:04 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -354,11 +354,11 @@ void	Connection::pollIn(void)
 		return ;
 	}
 	requestData();
-	if (_method == "GET")
+	if (_method == "GET" && (_location.find(_uri) == _location.end() || (_location.find(_uri) != _location.end() && _location[_uri].allowed_methods["GET"]))) //enlever _location.find(_uri) == _location.end() si GET pas true par defaut
 		get();
-	else if (_method == "POST")
+	else if (_method == "POST" && _location.find(_uri) != _location.end() && _location[_uri].allowed_methods["POST"])
 		post();
-	else if (_method == "DELETE")
+	else if (_method == "DELETE" && _location.find(_uri) != _location.end() && _location[_uri].allowed_methods["DELETE"])
 	{
 		delete_function();
 	}

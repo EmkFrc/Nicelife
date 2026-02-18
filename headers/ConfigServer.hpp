@@ -41,7 +41,7 @@ class	ConfigServer {
 		const std::string& getHost() const { return _host; }
 		const std::string& getRoot() const { return _root; }
 		const std::string& getIndex() const { return _index; }
-		unsigned int getClientMaxBodySize() const { return _client_max_body_size; }
+		unsigned long getClientMaxBodySize() const { return _client_max_body_size; }
 		bool getAutoIndex() const { return _autoindex; }
 		const std::vector<std::string>& getServerNames() const { return _server_names; }
 		const std::map<int, std::string>& getErrorPages() const { return _error_pages; }

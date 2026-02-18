@@ -13,7 +13,7 @@ struct	Location {
 	std::map<int, std::string>	error_pages;
 	int							return_code;
 	std::string					return_url; // redirection
-	std::vector<std::string>	allowed_methods; // GET, POST, DELETE
+	std::map<std::string, bool>	allowed_methods; // GET, POST, DELETE
 	std::map<std::string, std::string>	cgi;
 	std::string					upload_store;
 	bool						upload_enable;
@@ -24,13 +24,15 @@ struct	Location {
 		root(""),
 		index("index.html"),
 		autoindex(false),
-		return_code(0),
+		return_code(-1),
 		return_url(""),
 		cgi(),
 		upload_store("data"),
 		upload_enable(true)
 		{
-			allowed_methods.push_back("GET");
+			allowed_methods["GET"] = true;
+			allowed_methods["POST"] = false;
+			allowed_methods["DELETE"] = false;
 		}
 };
 

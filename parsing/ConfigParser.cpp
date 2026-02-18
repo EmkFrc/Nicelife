@@ -185,9 +185,18 @@ void ConfigParser::parseLocation(ConfigServer& server) {
 		}
 		else if (_tokens[_pos] == "allowed_methods") {
 			_pos++;
-			newLoc.allowed_methods.clear();
-            while (_tokens[_pos] != ";")
-                newLoc.allowed_methods.push_back(_tokens[_pos++]);
+			newLoc.allowed_methods["GET"] = false;
+			newLoc.allowed_methods["POST"] = false;
+			newLoc.allowed_methods["DELETE"] = false;
+            while (_pos < _tokens.size() && _tokens[_pos] != ";") {
+				std::string method = _tokens[_pos++];
+				if (method == "GET" || method == "POST" || method == "DELETE") {
+					newLoc.allowed_methods[method] = true;				
+				}
+				else {
+					throw std::runtime_error("Unknow method: " + method);
+				}
+			}
             checkSemicolon();
         }
         else if (_tokens[_pos] == "return") {

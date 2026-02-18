@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/17 18:40:42 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/18 14:35:42 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,16 @@ void	Connection::send404(bool status)
 	_write_buf = _response.build();
     sendData();
 	_fd->events = POLLOUT;
+}
+
+void	Connection::redirect(int status, std::string url)
+{
+	_response.setStatus(status);
+	_response.addHeader("Location", url);
+    _response.addHeader("Connection", "close");
+	_write_buf.clear();
+	_write_buf = _response.build();
+	sendData();
 }
 
 void	Connection::sendErrorPage(int status, std::string errorMsg)
@@ -221,7 +231,9 @@ void	Connection::get(void)
 		_root = _location[_uri].root;
 	else
 		_root = _default_root;
-	if (is_cgi(_uri))
+	if (_location.find(_uri) != _location.end() && !_location[_uri].return_url.empty())
+		redirect(_location[_uri].return_code, _location[_uri].return_url);
+	else if (is_cgi(_uri))
         start_cgi();
 	else if (stat(_uri.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 		autoindex();

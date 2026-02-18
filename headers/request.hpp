@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/17 18:22:05 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/18 14:30:34 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ class	Connection
 	void		requestData(void);
 
 	void		send404(bool status);
+	void		redirect(int status, std::string url);
 	void		sendErrorPage(int status, std::string errorMsg);
 	void		directoryListing(std::string path);
 	void		autoindex(void);
