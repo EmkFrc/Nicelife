@@ -2,6 +2,7 @@
 # define CONFIGSERVER_HPP
 
 # include "Location.hpp"
+# include <poll.h>
 
 class	ConfigServer {
 	private:
@@ -14,6 +15,7 @@ class	ConfigServer {
 		std::map<int, std::string>		_error_pages;
 		std::map<std::string, Location>	_locations;
 		bool							_autoindex;
+		int								_listenerIndex;
 
 	public:
 		ConfigServer() :
@@ -31,6 +33,7 @@ class	ConfigServer {
 		void setClientMaxBodySize(unsigned long size) { _client_max_body_size = size; }
 		void setIndex(const std::string& index) { _index = index; }
 		void setAutoIndex(bool value) { _autoindex = value; }
+		void setListener(int listener) { _listenerIndex = listener; }
 
 		void addServerName(const std::string& name) { _server_names.push_back(name); }
 		void addErrorPage(int code, const std::string& path) { _error_pages[code] = path; }
@@ -46,6 +49,7 @@ class	ConfigServer {
 		const std::vector<std::string>& getServerNames() const { return _server_names; }
 		const std::map<int, std::string>& getErrorPages() const { return _error_pages; }
 		const std::map<std::string, Location>& getLocations() const { return _locations; }
+		int getListener() { return _listenerIndex; }
 };
 
 #endif

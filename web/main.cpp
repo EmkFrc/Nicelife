@@ -73,8 +73,11 @@ int	main(int ac, char **av)
 		std::cerr << "Configuration error : " << e.what() << std::endl;
 		return 1;
 	}
-	data.setAddrinfo();
-	data.addListener();
+	for (int serverIndex = 0; serverIndex < (int)data.getServers().size(); serverIndex++)
+	{
+		data.setAddrinfo(serverIndex);
+		data.addListener(serverIndex);
+	}
 	data.pollLoop();
 	data.clean();
 }

@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/25 20:54:02 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/29 15:21:39 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/18 18:45:45 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,26 +42,28 @@ class	Data
 	
 	Data();
 	~Data();
-	void			setServers(std::vector<ConfigServer> _servers);
-	void			setAddrinfo(void);
-	struct addrinfo	*getAddrinfo(void);
-	void			addListener(void);
-	void			newClient(int fd);
-	void			clientRequest(int index);
-	void			pollLoop(void);
-	int				getFd(int index);
-	void			clean(void);
-	void			exit(int status);
-	void			exitError(void);
+	void							setServers(std::vector<ConfigServer> _servers);
+	void							setAddrinfo(int index);
+	struct addrinfo					*getAddrinfo(int index);
+	void							addListener(int index);
+	void							newClient(int fd, int serverIndex);
+	void							clientRequest(int index, int serverIndex);
+	void							pollLoop(void);
+	int								getFd(int index);
+	void							clean(void);
+	void							exit(int status);
+	void							exitError(void);
+	std::vector<ConfigServer>&		getServers() { return _servers; }
 	
 	private:
 
-	struct addrinfo	*			_addrinfo;
-	struct pollfd				_fds[MAX_FDS];
-	std::map<int, Connection>	_connections;
-	int							_fdsNbr;
-	std::vector<ConfigServer>	_servers;
-	std::string					_root;
+	std::vector<struct addrinfo	*>	_addrinfo;
+	struct pollfd					_fds[MAX_FDS];
+	int								_clientServer[MAX_FDS];
+	std::map<int, Connection>		_connections;
+	int								_fdsNbr;
+	std::vector<ConfigServer>		_servers;
+	std::string						_root;
 };
 
 std::string	getTimestamp(void);
