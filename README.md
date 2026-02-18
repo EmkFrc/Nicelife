@@ -204,3 +204,5 @@ Attends ma validation à chaque grande étape avant de continuer.
 //TODO gerer les messages d'erreurs send error ne permet pas d'afficher le message (message automatique: "Servor error: status")
 
 //TODO toujours pas de requete delete envoyee (soit delete cookie username soit delete images)
+
+//TODO plusieurs serveurs ?
