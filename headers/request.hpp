@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
+/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/18 14:30:34 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/20 21:50:06 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ class	Connection
 
 	void		set_cgi_env(void);
 	void		start_cgi(void);
-	void		handle_executing_cgi(void);
+	void		executing_cgi(void);
 
 	void		getFilename(std::string username, t_upload *data, size_t headersLength);
 	bool		getExec();
@@ -75,6 +75,16 @@ class	Connection
 	void		pollOut(void);
 	void		pollIn(void);
 	bool		closeRequest(void);
+	time_t getCurrentTimeSec();
+	double getElapsedTimeSec(time_t startTime);
+
+	bool	is_cgi_d(const std::string &str);
+	bool is_uploads(const std::string& str, std::string& stock);
+	bool verif_path_traversal(const std::string& str);
+	bool verif_extension(const std::string& str);
+	bool verif_username(const std::string& filename, const std::string& cookie_string);
+	bool	file_exists(const std::string &path);
+
 
 	void sendError(int code, const std::string& message);
 	private:
@@ -100,6 +110,7 @@ class	Connection
 	CGIExecution* 						_cgi;
 	bool								_executing;
 	bool								_close;
+	time_t start_time;
 };
 
 

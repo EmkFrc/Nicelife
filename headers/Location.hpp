@@ -18,7 +18,7 @@ struct	Location {
 	std::string					upload_store;
 	bool						upload_enable;
 
-	// Valeurs par defaut
+
 	Location() :
 		path(""),
 		root(""),

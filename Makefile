@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+         #
+#    By: efranco <efranco@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/05 15:41:03 by nmartin           #+#    #+#              #
-#    Updated: 2026/01/29 14:38:44 by nmartin          ###   ########.fr        #
+#    Updated: 2026/02/20 21:54:20 by efranco          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,7 @@ WEB_PATH = ./web/
 WEB_FILES = main.cpp Data.cpp
 WEB := $(addprefix $(WEB_PATH), $(WEB_FILES))
 REQUEST_PATH = ./request/
-REQUEST_FILES = Connection.cpp get.cpp post.cpp CGI.cpp
+REQUEST_FILES = Connection.cpp get.cpp post.cpp delete.cpp CGI.cpp
 REQUEST := $(addprefix $(REQUEST_PATH), $(REQUEST_FILES))
 PARSING_PATH = ./parsing/
 PARSING_FILES = ConfigParser.cpp
@@ -87,6 +87,6 @@ re : fclean all
 exec : fclean all
 	@make clean --no-print-directory
 
-.PHONY : all clean fclean re	
+.PHONY : all clean fclean re
 
 -include $(DEPS)

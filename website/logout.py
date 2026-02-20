@@ -2,13 +2,11 @@
 
 from http.cookies import SimpleCookie
 
-# Supprimer le cookie
 cookie = SimpleCookie()
 cookie["username"] = ""
 cookie["username"]["path"] = "/"
 cookie["username"]["max-age"] = 0
 
-# Afficher une page HTML avec redirection automatique
 print("Content-Type: text/html; charset=utf-8")
 print(cookie.output())
 print()

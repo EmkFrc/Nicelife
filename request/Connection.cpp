@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
+/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/17 19:20:04 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/20 21:48:49 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	Connection::setConf(const ConfigServer &server)
 	_default_index = server.getIndex();
 	_error_pages = server.getErrorPages();
 	_client_max_body_size = server.getClientMaxBodySize();
-	_location = server.getLocations();	
+	_location = server.getLocations();
 }
 
 void Connection::sendData(void)
@@ -131,171 +131,6 @@ void Connection::pollOut(void)
 	recvData();
 	_fd->events = POLLIN;
 }
-bool	is_cgi_d(const std::string &str)
-{
-    if (str.find("/uploads/") == 0)
-	{
-        return false;
-	}
-	size_t	i = str.find_last_of('.');
-	if (i != std::string::npos)
-	{
-		std::string tmp = str.substr(i);
-		if (tmp == ".php" || tmp == ".py" || tmp == ".sh")
-			return (true);
-	}
-	return (false);
-}
-bool is_uploads(const std::string& str, std::string& stock)
-{
-	size_t i;
-	std::string tmp;
-	if (str[0] == '/')
-		tmp = str.substr(1);
-	else
-		return (false);
-	i = tmp.find_first_of('/');
-	if (i != std::string::npos)
-	{
-		std::string new_str = tmp.substr(0, i + 1);
-		if (new_str == "uploads/")
-		{
-			stock = tmp.substr(i + 1);
-			 return (true);
-		}
-	}
-	return (false);
-}
-bool verif_path_traversal(const std::string& str)
-{
-	if (str[0] == '/')
-	{
-		return (false);
-	}
-	if (str.find("//") != std::string::npos)
-	{
-		return (false);
-	}
-	return (true);
-}
-bool verif_extension(const std::string& str)
-{
-
-	size_t i = str.find_last_of('.');
-	if (i != std::string::npos)
-	{
-		std::string tmp = str.substr(i);
-		if (tmp == ".jpg" || tmp == ".png" || tmp == ".pdf")
-			return (true);
-	}
-	return (false);
-}
-std::string extract_username_from_cookie(const std::string& cookie_string)
-{
-    size_t pos = cookie_string.find("username=");
-    if (pos == std::string::npos)
-        return "";
-    size_t start = pos + 9;
-    size_t end = cookie_string.find(';', start);
-    if (end == std::string::npos)
-        end = cookie_string.length();
-    std::string username = cookie_string.substr(start, end - start);
-
-    size_t first = username.find_first_not_of("\t");
-    if (first == std::string::npos)
-        return "";
-    size_t last = username.find_last_not_of(" \t");
-
-    return username.substr(first, last - first + 1);
-}
-
-bool verif_username(const std::string& filename, const std::string& cookie_string)
-{
-    std::string username = extract_username_from_cookie(cookie_string);
-
-    if (username.empty())
-    {
-        return false;
-    }
-    std::string prefix = username + "_";
-    bool result = (filename.find(prefix) == 0);
-
-    return result;
-}
-bool	file_exists(const std::string &path)
-{
-	struct stat	buffer;
-
-	return (stat(path.c_str(), &buffer) == 0);
-}
-void Connection::delete_function()
-{
-	if (is_cgi_d(_uri))
-	{
-		start_cgi();
-		return ;
-	}
-	else
-	{
-		std::string stock;
-		if (is_uploads(_uri, stock))
-		{
-			_path_upload = stock;
-			if (verif_path_traversal(_path_upload)
-				&& verif_extension(_path_upload) && verif_username(_path_upload,
-					_env.get_Cookie_string()))
-			{
-				std::string filepath = "data/" + _path_upload;
-				if (!file_exists(filepath))
-				{
-					std::cout << "File not found (404)" << std::endl;
-					_response.setStatus(404);
-					_response.addHeader("Content-Type", "application/json");
-					_response.setBody("{\"error\": \"File not found\"}");
-					_write_buf = _response.build();
-					return ;
-				}
-				if (std::remove(filepath.c_str()) == 0)
-				{
-					_response.setStatus(200);
-					_response.addHeader("Content-Type", "application/json");
-					_response.setBody("{"
-										"\"status\": \"success\","
-										"\"message\": \"File deleted successfully\","
-										"\"file\": \"" +
-										_path_upload +
-										"\""
-										"}");
-					_write_buf = _response.build();
-				}
-				else
-				{
-					std::cout << "Failed to delete file" << std::endl;
-					_response.setStatus(500);
-					_response.addHeader("Content-Type", "application/json");
-					_response.setBody("{"
-										"\"error\": \"Internal server error\","
-										"\"details\": \"Failed to delete file\""
-										"}");
-					_write_buf = _response.build();
-				}
-			}
-			else
-			{
-				_response.setStatus(403);
-				_response.setBody("Forbidden");
-				_write_buf = _response.build();
-			}
-		}
-		else
-		{
-			_response.setStatus(404);
-			_response.setBody("Not Found");
-			_write_buf = _response.build();
-		}
-	}
-	sendData();
-}
 
 void	Connection::pollIn(void)
 {
@@ -356,9 +191,9 @@ void	Connection::pollIn(void)
 	requestData();
 	if (_method == "GET" && (_location.find(_uri) == _location.end() || (_location.find(_uri) != _location.end() && _location[_uri].allowed_methods["GET"]))) //enlever _location.find(_uri) == _location.end() si GET pas true par defaut
 		get();
-	else if (_method == "POST" && _location.find(_uri) != _location.end() && _location[_uri].allowed_methods["POST"])
+	else if (_method == "POST")
 		post();
-	else if (_method == "DELETE" && _location.find(_uri) != _location.end() && _location[_uri].allowed_methods["DELETE"])
+	else if (_method == "DELETE")
 	{
 		delete_function();
 	}
@@ -373,4 +208,13 @@ void	Connection::pollIn(void)
 bool Connection::closeRequest(void)
 {
 	return (_close);
+}
+time_t Connection::getCurrentTimeSec()
+{
+    return time(NULL);
+}
+double Connection::getElapsedTimeSec(time_t startTime)
+{
+    time_t currentTime = getCurrentTimeSec();
+    return difftime(currentTime, startTime);
 }

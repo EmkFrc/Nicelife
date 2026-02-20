@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
+/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/11 20:08:27 by nmartin           #+#    #+#             */
-/*   Updated: 2026/01/29 16:01:04 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/20 13:45:36 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ void Connection::start_cgi(void)
 
     char    *args[] = {(char *)"/usr/bin/python3", (char *)chemin_reel.c_str(), NULL};
 
+    start_time = getCurrentTimeSec();
     if (pipe(pipein) == -1 || pipe(pipeout) == -1)
     {
         std::cerr << "error : pipe()" << std::endl;
@@ -141,61 +142,67 @@ void Connection::start_cgi(void)
     }
 }
 
-void	Connection::handle_executing_cgi(void)
+void	Connection::executing_cgi(void)
 {
 	char		buffer[4096];
 	ssize_t		n;
 	int			status;
 	int			result;
 
-	if (_cgi != NULL)
-	{
-		n = read(_cgi->pipe_fd, buffer, sizeof(buffer));
-		if (n > 0)
-			_cgi->output.append(buffer, n);
-		if (n == 0)
-			std::cout << "EOF sur le pipe" << std::endl;
-		if (n == -1)
-		{
-			if (errno != EAGAIN && errno != EWOULDBLOCK)
-			{
-				std::cerr << "error : read()" << std::endl;
-				return ;
-			}
-		}
-		result = waitpid(_cgi->pid, &status, WNOHANG);
-
-		if (result > 0)
-		{
-			_cgi->completed = true;
-		}
-		if (result == -1)
-		{
-			std::cerr << "error : waitpid()" << std::endl;
-			return ;
-		}
-		if (_cgi->completed == true)
-		{
-			_executing = false;
-    		parse_cgi_output(_cgi);
-    		std::map<std::string, std::vector<std::string> > parsed_headers;
-    		if (_cgi->has_headers)
-        		parse_cgi_headers(_cgi->cgi_headers, parsed_headers);
-    		else
-			{
-        		parsed_headers["Content-Type"].push_back("text/html");
-			}
-			_write_buf.clear();
-			_write_buf = build_cgi_response(_cgi, parsed_headers);
-			sendData();
-			close(_cgi->pipe_fd);
-			delete _cgi;
-			_cgi = NULL;
-		}
-	}
-	else
+    if (_cgi == NULL)
 	{
 		std::cerr << "Erreur : cgi est NULL" << std::endl;
 		return ;
+	}
+
+    pid_t pid = _cgi->pid;
+	if (getElapsedTimeSec(start_time) > 15)
+	{
+		printf("TIMEOUT: Le CGI a dépassé 15 secondes\n");
+		kill(pid, SIGKILL);
+		waitpid(pid, NULL, 0);
+		close(_cgi->pipe_fd);
+		sendError(504, "Gateway Timeout");
+		_executing = false;
+		delete _cgi;
+		_cgi = NULL;
+		return;
+	}
+	result = waitpid(_cgi->pid, &status, WNOHANG);
+	if (result == -1)
+	{
+		std::cerr << "error : waitpid()" << std::endl;
+		close(_cgi->pipe_fd);
+		delete _cgi;
+		_cgi = NULL;
+		return ;
+	}
+	if (result > 0)
+	{
+
+		_cgi->completed = true;
+	}
+	n = read(_cgi->pipe_fd, buffer, sizeof(buffer));
+	if (n > 0)
+		_cgi->output.append(buffer, n);
+	if (n == 0)
+		std::cout << "EOF sur le pipe" << std::endl;
+	if (_cgi->completed == true)
+	{
+		_executing = false;
+		parse_cgi_output(_cgi);
+		std::map<std::string, std::vector<std::string> > parsed_headers;
+		if (_cgi->has_headers)
+			parse_cgi_headers(_cgi->cgi_headers, parsed_headers);
+		else
+		{
+			parsed_headers["Content-Type"].push_back("text/html");
+		}
+		_write_buf.clear();
+		_write_buf = build_cgi_response(_cgi, parsed_headers);
+		sendData();
+		close(_cgi->pipe_fd);
+		delete _cgi;
+		_cgi = NULL;
 	}
 }

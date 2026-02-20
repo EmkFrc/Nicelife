@@ -4,9 +4,6 @@ import os
 import sys
 from http.cookies import SimpleCookie
 
-# ═══════════════════════════════════════════════════════════
-# LOGS pour debug
-# ═══════════════════════════════════════════════════════════
 
 try:
     with open("/tmp/dashboard_debug. log", "w") as log:
@@ -33,19 +30,13 @@ try:
 
         log.write("=== GENERATING HTML ===\n")
 except Exception as e:
-    # Si le log plante, on continue quand même
     username = ""
 
-# ═══════════════════════════════════════════════════════════
-# TOUJOURS envoyer des headers HTTP
-# ═══════════════════════════════════════════════════════════
+
 
 print("Content-Type: text/html; charset=utf-8")
 print()
 
-# ═══════════════════════════════════════════════════════════
-# Récupérer le cookie (même code que dans les logs)
-# ═══════════════════════════════════════════════════════════
 
 cookie_string = os.environ.get("HTTP_COOKIE", "")
 cookie = SimpleCookie()
@@ -55,14 +46,9 @@ username = ""
 if "username" in cookie:
     username = cookie["username"].value
 
-# ═══════════════════════════════════════════════════════════
-# HTML selon si connecté ou non
-# ═══════════════════════════════════════════════════════════
 
 if username:
-    # ════════════════════════════════════════════════════════
-    # CONNECTÉ
-    # ════════════════════════════════════════════════════════
+
     print(f"""<! DOCTYPE html>
 <html>
 <head>
@@ -150,9 +136,7 @@ if username:
 </html>""")
 
 else:
-    # ════════════════════════════════════════════════════════
-    # NON CONNECTÉ
-    # ════════════════════════════════════════════════════════
+
     print("""<!DOCTYPE html>
 <html>
 <head>
@@ -220,10 +204,6 @@ else:
     </div>
 </body>
 </html>""")
-
-# ═══════════════════════════════════════════════════════════
-# Log final
-# ═══════════════════════════════════════════════════════════
 
 try:
     with open("/tmp/dashboard_debug.log", "a") as log:

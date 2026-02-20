@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
+/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/25 20:54:02 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/18 18:45:45 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/20 13:50:15 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,14 @@
 #include "ConfigParser.hpp"
 #include "ConfigTokenizer.hpp"
 
-#define MAX_FDS 250
+#define MAX_FDS 1024
 
 class Connection;
 
 class	Data
 {
 	public:
-	
+
 	Data();
 	~Data();
 	void							setServers(std::vector<ConfigServer> _servers);
@@ -54,7 +54,7 @@ class	Data
 	void							exit(int status);
 	void							exitError(void);
 	std::vector<ConfigServer>&		getServers() { return _servers; }
-	
+
 	private:
 
 	std::vector<struct addrinfo	*>	_addrinfo;
