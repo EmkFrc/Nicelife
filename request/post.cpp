@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 13:52:30 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/18 17:04:00 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/21 20:43:07 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void	Connection::getFilename(std::string username, t_upload *data, size_t header
 	std::string upload_root;
 	if (_location.find("/upload.html") != _location.end())
 	{
-		upload_root = _location["/upload.html"].upload_store;//TODO renvoie toujours "data"
+		upload_root = _location["/upload.html"].upload_store;
 	}
 	else
 		upload_root = "data";

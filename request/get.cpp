@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/18 14:35:42 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/21 20:43:01 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,12 +173,8 @@ void	Connection::sendResponse(std::string filename, bool status)
 		_response.setStatus(200);
 	_response.addHeader("Content-Type", _response.get_content_type(filename));
 	_response.setBody(content);
-	// _write_buf += "Content-Length" + length + "\r\n";//TODO faire content length
 	_write_buf.clear();
 	_write_buf = _response.build();
-	// std::cout << "------------------------" << std::endl;
-	// std::cout << _write_buf << std::endl;
-	// std::cout << "------------------------" << std::endl;
 	sendData();
 }
 

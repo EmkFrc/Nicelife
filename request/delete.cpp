@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   delete.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/23 17:06:05 by efranco           #+#    #+#             */
-/*   Updated: 2026/02/20 21:59:07 by efranco          ###   ########.fr       */
+/*   Updated: 2026/02/21 20:42:52 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,11 +35,22 @@ bool Connection::is_uploads(const std::string& str, std::string& stock)
 		tmp = str.substr(1);
 	else
 		return (false);
-	i = tmp.find_first_of('/');
+	i = tmp.find_last_of('/');
 	if (i != std::string::npos)
 	{
-		std::string new_str = tmp.substr(0, i + 1);
-		if (new_str == "data/")
+		std::string new_str = "/" + tmp.substr(0, i + 1);
+		std::string	upload_root;
+		if (_location.find(_uri) != _location.end() && !_location[_uri].root.empty())
+			_root = _location[_uri].root;
+		else
+		_root = _default_root;
+		if (_location.find("/upload.html") != _location.end())
+		{
+			upload_root = _location["/upload.html"].upload_store;
+		}
+		else
+			upload_root = "data";
+		if (new_str == _root + upload_root.substr(1) + "/")
 		{
 			stock = tmp.substr(i + 1);
 			 return (true);
@@ -51,7 +62,6 @@ bool Connection::verif_path_traversal(const std::string& str)
 {
 	if (str[0] == '/')
 	{
-
 		return (false);
 	}
 	if (str.find("//") != std::string::npos)
@@ -97,7 +107,6 @@ bool Connection::verif_username(const std::string& filename, const std::string& 
 
     if (username.empty())
     {
-
         return false;
     }
     std::string prefix = username + "_";
@@ -121,6 +130,7 @@ void Connection::delete_function()
 	else
 	{
 		std::string stock;
+		std::string upload_root;
 
 		if (is_uploads(_uri, stock))
 		{
@@ -129,7 +139,18 @@ void Connection::delete_function()
 				&& verif_extension(_path_upload) && verif_username(_path_upload,
 					_env.get_Cookie_string()))
 			{
-				std::string filepath = "website/data/" + _path_upload;
+				if (_location.find(_uri) != _location.end() && !_location[_uri].root.empty())
+					_root = _location[_uri].root;
+				else
+					_root = _default_root;
+				if (_location.find("/upload.html") != _location.end())
+				{
+					upload_root = _location["/upload.html"].upload_store;
+				}
+				else
+					upload_root = "data";
+				std::string filepath = "website" + upload_root + "/" + _path_upload;
+				std::cout << filepath << std::endl;
 				if (!file_exists(filepath))
 				{
 					std::cout << "File not found (404)" << std::endl;
