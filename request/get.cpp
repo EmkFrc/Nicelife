@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/17 21:31:37 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/21 20:43:01 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/21 22:03:02 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ void	Connection::send404(bool status)
 	_response.setBody("<h1>404 - File Not Found</h1>");
 	_write_buf.clear();
 	_write_buf = _response.build();
-    sendData();
 	_fd->events = POLLOUT;
 }
 
@@ -35,7 +34,6 @@ void	Connection::redirect(int status, std::string url)
     _response.addHeader("Connection", "close");
 	_write_buf.clear();
 	_write_buf = _response.build();
-	sendData();
 }
 
 void	Connection::sendErrorPage(int status, std::string errorMsg)
@@ -53,7 +51,6 @@ void	Connection::sendErrorPage(int status, std::string errorMsg)
 	_response.setBody(message);
 	_write_buf.clear();
 	_write_buf = _response.build();
-    sendData();
 	_fd->events = POLLOUT;
 }
 
@@ -127,7 +124,6 @@ void	Connection::directoryListing(std::string path)
 	_response.setBody(listingPage.str());
 	_response.addHeader("Content-Length", intToString(listingPage.str().length()));
 	_write_buf = _response.build();
-	sendData();
 	_fd->events = POLLOUT;
 }
 
@@ -175,7 +171,6 @@ void	Connection::sendResponse(std::string filename, bool status)
 	_response.setBody(content);
 	_write_buf.clear();
 	_write_buf = _response.build();
-	sendData();
 }
 
 void	Connection::sendIcon(void)
@@ -200,7 +195,6 @@ void	Connection::sendIcon(void)
     _write_buf += "Connection: keep-alive\r\n";
     _write_buf += "\r\n";
     _write_buf += content;
-    sendData();
 }
 bool	is_cgi(const std::string &str)
 {

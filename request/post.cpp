@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 13:52:30 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/21 20:43:07 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/21 22:09:31 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,14 +217,9 @@ void	Connection::post(void)
 		if (_location.find("/upload.html") != _location.end() && !_location["/upload.html"].upload_enable)
 			sendError(405, "Upload disbabled in server's configuration");
 		else
-		{
 			upload();
-			sendData();
-		}
 		return;
 	}
 	else
-	{
 		sendError(404, "Resource not found");
-	}
 }

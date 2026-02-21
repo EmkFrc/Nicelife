@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/11 20:08:27 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/20 13:45:36 by efranco          ###   ########.fr       */
+/*   Updated: 2026/02/21 22:02:02 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,7 +200,6 @@ void	Connection::executing_cgi(void)
 		}
 		_write_buf.clear();
 		_write_buf = build_cgi_response(_cgi, parsed_headers);
-		sendData();
 		close(_cgi->pipe_fd);
 		delete _cgi;
 		_cgi = NULL;

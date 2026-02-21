@@ -6,7 +6,7 @@
 /*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/23 17:06:05 by efranco           #+#    #+#             */
-/*   Updated: 2026/02/21 20:42:52 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/21 22:03:39 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,6 +199,6 @@ void Connection::delete_function()
 			_write_buf = _response.build();
 		}
 	}
-	sendData();
+	_fd->events = POLLOUT;
 }
 

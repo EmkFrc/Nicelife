@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 23:04:14 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/20 21:48:49 by efranco          ###   ########.fr       */
+/*   Updated: 2026/02/21 22:02:10 by nmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ void Connection::sendError(int code, const std::string& message)
 
     _response.setBody(json.str());
     _write_buf = _response.build();
-    sendData();
 	_fd->events = POLLOUT;
 }
 
@@ -127,8 +126,8 @@ void Connection::requestData(void)
 
 void Connection::pollOut(void)
 {
-	std::string response;
-	recvData();
+	if (!_write_buf.empty())
+		sendData();
 	_fd->events = POLLIN;
 }
 
