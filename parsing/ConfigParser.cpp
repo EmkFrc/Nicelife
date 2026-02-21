@@ -59,6 +59,12 @@ unsigned long ConfigParser::parseSize(std::string s) {
 void ConfigParser::parse() {
 	while (_pos < _tokens.size()) {
 		if (_tokens[_pos] == "server") {
+			ConfigServer newServer = parseServer();
+			for (size_t i = 0; i < _servers.size(); ++i) {
+				if (_servers[i].getPort() == newServer.getPort() && _servers[i].getHost() == newServer.getHost()) {
+					throw std::runtime_error("Configuration error: multiple servers listening on " + newServer.getHost() + ";" + static_cast<std::string>(_tokens[_pos - 1]));
+				}
+			}
 			_servers.push_back(parseServer());
 		} else {
 			throw std::runtime_error("Configuration error: unknown or misplaced directive '" + _tokens[_pos] + "'");
@@ -98,7 +104,11 @@ ConfigServer ConfigParser::parseServer() {
 		}
 		else if (_tokens[_pos] == "root") {
 			_pos++;
-			newServer.setRoot(_tokens[_pos]);
+			std::string rootPath = _tokens[_pos];
+			if (!rootPath.empty() && rootPath[rootPath.length() -1] != '/') {
+				rootPath += "/";
+			}
+			newServer.setRoot(rootPath);
 			_pos++;
 			checkSemicolon();
 		}
