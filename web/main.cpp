@@ -42,11 +42,20 @@ std::string	getTimestamp(void)
     std::sprintf(buf, "_upload_%02d%02d%02d%02d%03d", year2, month, day, seconds, milli);
     return std::string(buf);
 }
+volatile sig_atomic_t flag_signal = 1;
+
+void turn_signal(int sig)
+{
+    (void)sig;
+    flag_signal = 0;
+}
 
 int	main(int ac, char **av)
 {
 	Data	data;
 
+	std::signal(SIGINT, turn_signal);
+    std::signal(SIGTERM, turn_signal);
 	if (ac != 2)
 	{
 		std::cerr << "Error: Bad arguments!\nUsage: ./webserv [configuration file]" << std::endl;

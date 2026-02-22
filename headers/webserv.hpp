@@ -6,7 +6,7 @@
 /*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/25 20:54:02 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/20 13:50:15 by efranco          ###   ########.fr       */
+/*   Updated: 2026/02/22 14:51:05 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 #include <sstream>
 #include <fstream>
 #include <fcntl.h>
-
+#include <csignal>
 #include <ctime>
 #include <sys/time.h>
 #include <unistd.h>
@@ -33,6 +33,10 @@
 #include "ConfigTokenizer.hpp"
 
 #define MAX_FDS 1024
+
+extern volatile sig_atomic_t	flag_signal;
+
+void							on_signal(int sig);
 
 class Connection;
 

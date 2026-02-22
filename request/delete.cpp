@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   delete.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
+/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/23 17:06:05 by efranco           #+#    #+#             */
-/*   Updated: 2026/02/21 22:03:39 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/22 15:39:42 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ bool Connection::verif_extension(const std::string& str)
 	if (i != std::string::npos)
 	{
 		std::string tmp = str.substr(i);
-		if (tmp == ".jpg" || tmp == ".png" || tmp == ".pdf")
+		if (tmp == ".jpg" || tmp == ".png" || tmp == ".pdf" || tmp == ".jpeg")
 			return (true);
 	}
 	return (false);

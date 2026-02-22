@@ -6,7 +6,7 @@
 /*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/28 16:02:50 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/20 21:36:42 by efranco          ###   ########.fr       */
+/*   Updated: 2026/02/22 14:52:11 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,13 +162,13 @@ void	Data::pollLoop(void)
 {
 	int						pollV;
 
-	while (1)
+	while (flag_signal == 1)
 	{
+		for (int i = 0; i < MAX_FDS; i++)
+    		_fds[i].revents = 0;
 		pollV = poll(_fds, MAX_FDS, 1000);
-		if (pollV == -1)
-			exitError();
-		else if (pollV == 0)
-			continue ;
+		if (flag_signal == 0)
+			break;
 		for (int serverIndex = 0; serverIndex < (int)_servers.size(); serverIndex++)
 		{
 			if (_fds[_servers[serverIndex].getListener()].revents & POLLIN)
