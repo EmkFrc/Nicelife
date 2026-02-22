@@ -1,7 +1,7 @@
 # WebServ
 
 
-This project has been created as part of the 42 curriculum by efranco, joudafke and nmartin.
+*This project has been created as part of the 42 curriculum by efranco, joudafke and nmartin.*
 
 
 ## Description
