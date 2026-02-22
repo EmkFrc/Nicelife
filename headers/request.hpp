@@ -6,7 +6,7 @@
 /*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/12 15:04:18 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/20 21:50:06 by efranco          ###   ########.fr       */
+/*   Updated: 2026/02/22 16:37:32 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <algorithm>
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 1048576
 
 typedef	struct s_upload
 {

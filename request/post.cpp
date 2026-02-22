@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   post.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nmartin <nmartin@student.42.fr>            +#+  +:+       +#+        */
+/*   By: efranco <efranco@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 13:52:30 by nmartin           #+#    #+#             */
-/*   Updated: 2026/02/21 22:09:31 by nmartin          ###   ########.fr       */
+/*   Updated: 2026/02/22 21:11:19 by efranco          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,18 @@ bool createDirectories(const std::string &filepath)
 	return true;
 }
 
+bool validFormat(const std::string &path)
+	{
+		size_t dot_pos = path.find_last_of('.');
+		if (dot_pos == std::string::npos)
+			return (false);
+		std::string extension = path.substr(dot_pos);
+		if (extension == ".jpg" || extension == ".jpeg" || extension == ".png")
+			return (true);
+		else
+			return (false);
+};
+
 void	Connection::upload(void)
 {
 	size_t		start;
@@ -94,6 +106,7 @@ void	Connection::upload(void)
 	size_t		file_size;
 	t_upload	data;
 	std::string	username;
+	std::string	format;
 
 	std::string cookie = _env.get_Cookie_string();
 	username = extract_username_from_cookie(cookie);
@@ -117,6 +130,13 @@ void	Connection::upload(void)
         return;
 	}
 	getFilename(username, &data, end - start);
+	if (!validFormat(data.filename))
+	{
+		{
+        	sendError(415, "Unsupported Media Type");
+        	return;
+		}
+	}
 	std::cout << data.filename << "   Content-Length body: " << data.contentLength << std::endl;
 	if (data.filename.empty())
 	{
